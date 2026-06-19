@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AgentMarket — live</title>
+  <style>
+    body { font: 14px ui-monospace, monospace; background: #0b0e14; color: #cdd6f4; margin: 0; padding: 24px; }
+    h1 { font-size: 18px; color: #89dceb; }
+    .top { display: flex; gap: 20px; align-items: center; margin-bottom: 16px; }
+    .budget { flex: 1; }
+    .bar { height: 10px; background: #1f2430; border-radius: 5px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: #f9e2af; transition: width .3s; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .panel { background: #11151f; border: 1px solid #1f2430; border-radius: 10px; padding: 14px; }
+    .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #6c7086; margin: 0 0 10px; }
+    .svc { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1f2430; align-items: center; }
+    .repbar { height: 6px; width: 110px; background: #1f2430; border-radius: 3px; overflow: hidden; }
+    .repbar > i { display: block; height: 100%; background: #a6e3a1; }
+    .svc.blocked { opacity: .5; text-decoration: line-through; }
+    .svc.blocked .repbar > i { background: #f38ba8; }
+    #feed { height: 340px; overflow-y: auto; }
+    .ev { padding: 3px 0; }
+    .payment { color: #f9e2af; } .policy { color: #f38ba8; font-weight: bold; }
+    .lead.bad { color: #f38ba8; opacity: .75; } .tx { color: #74c7ec; }
+  </style>
+</head>
+<body>
+  <h1>🛰️ AgentMarket — budget-governed lead-gen agent (Circle Agent Wallet)</h1>
+  <div class="top">
+    <div class="budget">
+      <div>budget <span id="spent">$0.00</span> / <span id="cap">$0.00</span></div>
+      <div class="bar"><i id="budgetbar" style="width:0%"></i></div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="panel"><h2>Services / reputation</h2><div id="services"></div></div>
+    <div class="panel"><h2>Live feed — what it paid for & why</h2><div id="feed"></div></div>
+  </div>
+  <script>
+    const svcs = {};
+    const svcEl = document.getElementById("services"), feed = document.getElementById("feed");
+    function render() {
+      svcEl.innerHTML = Object.values(svcs).map(s => `
+        <div class="svc ${s.blocked ? 'blocked' : ''}">
+          <span>${s.id} ($${s.price ?? '?'})</span>
+          <span class="repbar"><i style="width:${Math.round((s.rep ?? .5)*100)}%"></i></span>
+        </div>`).join("");
+    }
+    function log(html, cls="") { const d = document.createElement("div"); d.className = "ev " + cls; d.innerHTML = html; feed.prepend(d); }
+    new EventSource("/stream").onmessage = (e) => {
+      const ev = JSON.parse(e.data);
+      const s = (id) => (svcs[id] ??= { id });
+      if (ev.type === "consider") { Object.assign(s(ev.service), { price: ev.price, rep: ev.reputation }); render(); }
+      else if (ev.type === "payment") log(`💸 wallet → ${ev.to}: $${ev.usdc} USDC — <i>${ev.reason}</i> ${ev.txHash ? `<span class="tx">${ev.txHash.slice(0,16)}…</span>` : ""}`, "payment");
+      else if (ev.type === "budget") { document.getElementById("spent").textContent = "$"+ev.spent.toFixed(2); document.getElementById("cap").textContent = "$"+ev.cap.toFixed(2); document.getElementById("budgetbar").style.width = Math.min(100, ev.spent/ev.cap*100)+"%"; }
+      else if (ev.type === "lead") log(`${ev.valid ? "✓" : "✗"} [${ev.service}] score ${ev.score?.toFixed(2)} — ${ev.preview}`, "lead " + (ev.valid ? "ok" : "bad"));
+      else if (ev.type === "policy") { Object.assign(s(ev.service), { blocked: true }); render(); log(`🚫 BLOCKLIST ${ev.service} — ${ev.reason}. Wallet will no longer pay it.`, "policy"); }
+      else if (ev.type === "discover") log(`🔎 discovered ${ev.count} candidates for "${ev.query}"`);
+      else log(ev.message ?? JSON.stringify(ev));
+    };
+  </script>
+</body>
+</html>
