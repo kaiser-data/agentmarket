@@ -15,6 +15,7 @@ import "dotenv/config";
 import { createInterface } from "node:readline/promises";
 import { query, type CanUseTool, type PermissionResult, type SDKMessage, type SDKUserMessage } from "@anthropic-ai/claude-agent-sdk";
 import { ensureSession } from "@agent-stack-ecosystem-kits/circle-tools";
+import { SIMULATE } from "../lib/rail.ts";
 import { buildLeadgenServer, MCP_SERVER_NAME, SPEND_TOOLS } from "./leadgen-tools.ts";
 import { policy, ledger, buildMission } from "./leadgen-core.ts";
 
@@ -55,7 +56,8 @@ async function main() {
   };
 
   // Ensure a valid Circle CLI session (email + OTP if needed) before running.
-  await ensureSession({ ask, log });
+  if (SIMULATE) log("SIMULATE=1 — mocking wallet, marketplace, and payments (no CLI, no USDC)");
+  else await ensureSession({ ask, log });
 
   const session = query({
     prompt: MISSION,

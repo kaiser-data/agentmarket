@@ -23,6 +23,7 @@ export class SpendPolicy {
 
   /** Gate a payment BEFORE it happens. Returns reason if blocked. */
   authorize(payTo: string, amountUsdc: number): { ok: boolean; reason?: string; needsApproval?: boolean } {
+    amountUsdc = Number(amountUsdc) || 0;
     if (this.policy.blocklist.includes(payTo)) return { ok: false, reason: "payee blocklisted (failed validation earlier)" };
     if (this.policy.spentUsdc + amountUsdc > this.policy.budgetUsdc) return { ok: false, reason: "would exceed budget cap" };
     const needsApproval = this.policy.requireApprovalOverUsdc != null && amountUsdc > this.policy.requireApprovalOverUsdc;
@@ -30,7 +31,7 @@ export class SpendPolicy {
   }
 
   recordSpend(amountUsdc: number) {
-    this.policy.spentUsdc += amountUsdc;
+    this.policy.spentUsdc += Number(amountUsdc) || 0;
   }
 
   /** Feedback after work is validated; auto-blocklists a payee that keeps failing. */

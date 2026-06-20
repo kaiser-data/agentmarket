@@ -10,7 +10,7 @@ export class Ledger {
   private entries: LedgerEntry[] = [];
 
   record(receipt: Receipt, ok: boolean) {
-    this.entries.push({ ...receipt, ok });
+    this.entries.push({ ...receipt, amountUsdc: Number(receipt.amountUsdc) || 0, ok });
   }
 
   get total() {

@@ -6,6 +6,7 @@
   "description": "Budget-governed lead-gen agent on the Circle Agent Stack (Claude Agent SDK) — discovers paid services, pays per-record via Nanopayments, and blocklists scam providers via wallet policy",
   "scripts": {
     "agent": "tsx agents/leadgen-agent-nebius.ts",
+    "agent:sim": "SIMULATE=1 tsx agents/leadgen-agent-nebius.ts",
     "agent:nebius": "tsx agents/leadgen-agent-nebius.ts",
     "agent:claude": "tsx agents/leadgen-agent.ts",
     "consumer": "tsx agents/consumer.ts",

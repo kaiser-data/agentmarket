@@ -10,8 +10,7 @@
 // including the rogue-catch blocklist.
 
 import { z } from "zod";
-import * as circle from "@agent-stack-ecosystem-kits/circle-tools";
-import { selectPayChain, ensureDeployed, selectGatewayChain, selectDepositMethod } from "@agent-stack-ecosystem-kits/kit-core/tools";
+import * as rail from "../lib/rail.ts";
 import { discoverCandidates } from "../lib/tavily.ts";
 import { qualify, validate } from "../lib/nebius.ts";
 import { SpendPolicy } from "../lib/policy.ts";
@@ -36,27 +35,31 @@ const chainEnum = z.enum(["BASE", "POLYGON"]);
 export const TOOLS: ToolDef[] = [
   // ---------- Circle Agent Wallet + Marketplace ----------
   { name: "circle_list_wallets", description: "List existing Circle agent wallets on Base. Returns [{address}].", shape: {},
-    handler: () => circle.listWallets() },
+    handler: () => rail.listWallets() },
 
   { name: "circle_create_wallet", description: "Create a new Circle agent wallet on Base. Returns {address}.", shape: {},
-    handler: () => circle.createWallet() },
+    handler: () => rail.createWallet() },
 
   { name: "circle_get_balance", description: "Check USDC + token balances for a wallet. Defaults to Base.",
     shape: { address: z.string(), chain: chainEnum.optional() },
-    handler: ({ address, chain }) => circle.getBalance({ address, chain }) },
+    handler: ({ address, chain }) => rail.getBalance(address, chain) },
+
+  { name: "circle_get_gateway_balance", description: "Check the wallet's Circle Gateway balance (the off-chain batched-payment pool, separate from the on-chain balance). Defaults to Base.",
+    shape: { address: z.string(), chain: chainEnum.optional() },
+    handler: ({ address, chain }) => rail.gatewayBalance(address, chain) },
 
   { name: "circle_deploy_wallet",
     description: "Deploy an agent wallet's smart account via a one-time zero-value self-transfer. A fresh wallet is counterfactual and cannot sign x402 payments until deployed. Idempotent, gas-abstracted. Call before the first circle_pay_service.",
     shape: { address: z.string(), chain: chainEnum.optional() },
-    handler: ({ address, chain }) => circle.deployWallet({ address, chain }) },
+    handler: ({ address, chain }) => rail.deployWallet(address, chain) },
 
   { name: "circle_search_services", description: "Discover x402 lead-enrichment services on the Circle Agent Marketplace by keyword.",
     shape: { keyword: z.string() },
-    handler: ({ keyword }) => circle.searchServices({ keyword }) },
+    handler: ({ keyword }) => rail.searchServices(keyword) },
 
   { name: "circle_inspect_service", description: "Inspect an x402 service: pricing, input schema, HTTP method, health. Always call before paying.",
     shape: { url: z.string() },
-    handler: ({ url }) => circle.inspectService({ url }) },
+    handler: ({ url }) => rail.inspectService(url) },
 
   // ---------- The guarded nanopayment (policy enforced here) ----------
   { name: "circle_pay_service", spend: true,
@@ -71,6 +74,7 @@ export const TOOLS: ToolDef[] = [
       dataJson: z.string().describe('JSON payload matching the service schema, e.g. {"candidate":{...}}.'),
     },
     handler: async ({ url, address, payTo, serviceId, amountUsdc, reason, method, dataJson }) => {
+      amountUsdc = Number(amountUsdc) || 0; // models sometimes emit numbers as strings
       await emit({ type: "consider", service: serviceId, price: amountUsdc, reputation: policy.score(serviceId) });
       const auth = policy.authorize(payTo, amountUsdc);
       if (!auth.ok) { await emit({ type: "blocked", service: serviceId, reason: auth.reason! }); throw new Error(`policy blocked payment: ${auth.reason}`); }
@@ -79,14 +83,12 @@ export const TOOLS: ToolDef[] = [
       try { data = JSON.parse(dataJson); } catch (e) { throw new Error(`invalid dataJson: ${(e as Error).message}`); }
 
       const httpMethod = (method ?? "POST").toUpperCase();
-      const picked = await selectPayChain(url, httpMethod, log);
-      if (!picked.ok) throw new Error(picked.message);
-      const dep = await ensureDeployed(address, picked.chain, log);
-      if (!dep.ok) throw new Error(dep.message);
-
-      const r = await circle.payService({ url, address, data, method: httpMethod, chain: picked.chain });
+      const r = await rail.payService({ url, address, data, method: httpMethod });
       policy.recordSpend(amountUsdc);
       const receipt = { service: serviceId, amountUsdc, txHash: r.txHash, ts: Date.now(), reason };
+      // Auto-record EVERY payment to the ledger here, where the money actually moves,
+      // so the spend ledger always matches reality (never relies on the model to log).
+      ledger.record(receipt, true);
       await emit({ type: "payment", from: "agent-wallet", to: serviceId, usdc: amountUsdc, txHash: r.txHash, reason });
       await emit({ type: "budget", spent: policy.policy.spentUsdc, cap: policy.policy.budgetUsdc, remaining: policy.remaining() });
       let body: any = r.response; try { body = JSON.parse(r.response); } catch { /* keep text */ }
@@ -96,11 +98,7 @@ export const TOOLS: ToolDef[] = [
   { name: "circle_gateway_deposit", spend: true,
     description: "Fund the wallet's Circle Gateway balance so it can pay a seller that requires Gateway (batched) x402. Pass the service URL; the kit confirms the requirement and picks the chain. Spends USDC.",
     shape: { url: z.string(), address: z.string(), amount: z.number().positive(), method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]).optional() },
-    handler: async ({ url, address, amount, method }) => {
-      const picked = await selectGatewayChain(url, (method ?? "POST").toUpperCase(), log);
-      if (!picked.ok) throw new Error(picked.message);
-      return circle.gatewayDeposit({ address, amount, chain: picked.chain, method: selectDepositMethod(picked.chain) });
-    } },
+    handler: ({ url, address, amount, method }) => rail.gatewayDeposit({ url, address, amount, method }) },
 
   // ---------- Domain tools ----------
   { name: "tavily_discover", description: "Discover candidate companies/people matching an ICP description, via Tavily web search. Returns [{company,domain,source}].",
@@ -123,16 +121,10 @@ export const TOOLS: ToolDef[] = [
       const v = await validate(lead);
       const good = v.valid && (lead.score ?? 1) >= 0.4;
       const { blocklisted } = policy.rate(serviceId, payTo, good);
-      await emit({ type: "lead", service: serviceId, score: lead.score ?? 0, valid: v.valid, preview: `${lead.company} — ${lead.title} <${lead.email}>` });
+      const company = lead.company ?? lead.organization?.name ?? "?";
+      await emit({ type: "lead", service: serviceId, score: lead.score ?? 0, valid: v.valid, preview: `${company} — ${lead.title} <${lead.email}>` });
       if (blocklisted) await emit({ type: "policy", service: serviceId, action: "blocklist", reason: v.reason || "low quality" });
       return { ...v, blocklisted };
-    } },
-
-  { name: "ledger_record", description: "Record a completed purchase to the spend ledger (receipt + whether the data was good). Call after validate_lead.",
-    shape: { serviceId: z.string(), amountUsdc: z.number(), reason: z.string(), txHash: z.string().optional(), ok: z.boolean() },
-    handler: async ({ serviceId, amountUsdc, reason, txHash, ok: good }) => {
-      ledger.record({ service: serviceId, amountUsdc, txHash, ts: Date.now(), reason }, good);
-      return { recorded: true, total: ledger.total };
     } },
 
   { name: "budget_status", description: "Report remaining budget, total spent, and the current payee blocklist.", shape: {},
@@ -169,17 +161,17 @@ You buy data from real x402 services on the Circle Agent Marketplace (provider: 
    body: {"email":"<email>"}
    returns: {status} ("completed" or "pending"); treat "pending" as UNVERIFIED (accept, note it), do not block on it.
 
-Workflow — call tools yourself, one step at a time:
+Workflow — call tools yourself, one step at a time. Do NOT skip steps and do NOT summarize early:
 1. circle_list_wallets (create with circle_create_wallet if none); circle_get_balance and circle_get_gateway_balance for the wallet address.
 2. circle_search_services "lead enrichment" — confirm the StableEnrich services are discoverable (discovery on the record).
-3. circle_pay_service the Apollo People Search once for the ICP (method POST; payTo 0x325b...d430; serviceId "apollo-people-search"; amountUsdc 0.02; reason; dataJson per schema above). If it fails needing a Gateway balance, call circle_gateway_deposit for that URL then retry once.
-4. For each returned person, until you hit the lead target or budget runs low (check budget_status):
-   a. nebius_qualify the person against the ICP.
-   b. If qualified and the person has an email, optionally circle_pay_service Hunter to verify it; record the result.
-   c. If the person has NO email, circle_pay_service Apollo People Enrich to get one, then qualify/verify.
-   d. validate_lead (free format check) and ledger_record each purchase (ok = qualified && email present/verified).
-5. Stop at the lead target or when budget_status shows no remaining budget.
-6. Finish with a summary: qualified leads (name, title, company, email), total USDC spent vs cap, and how many emails you verified.
+3. circle_pay_service the Apollo People Search ONCE (method POST; payTo 0x325bdF6F7efAB24a2210c48c1b64cAb2eAe1d430; serviceId "apollo-people-search"; amountUsdc 0.02; reason; dataJson per schema above). If it fails needing a Gateway balance, call circle_gateway_deposit for that URL then retry once. It returns a people[] list.
+4. Now process the people list ONE PERSON AT A TIME until you have the target number of FULLY PROCESSED leads (or budget_status shows no remaining budget). For EACH person you must, in order:
+   a. nebius_qualify(leadJson = that person, icp). Keep the returned score.
+   b. If qualified (score >= 0.5): if the person has no email, circle_pay_service Apollo People Enrich to get one. Then circle_pay_service Hunter Email Verifier on the email (serviceId "hunter-email-verifier", amountUsdc 0.03) — if result is "deliverable" the lead is verified; if "undeliverable"/"risky" the lead is REJECTED (do not count it).
+   c. validate_lead(leadJson = the person WITH its score merged in, serviceId, payTo). (Every payment is logged to the spend ledger automatically — you do not record it yourself.)
+   Only after finishing a person do you move to the next one.
+5. Stop when you have verified the target number of leads, or budget_status shows no remaining budget.
+6. Summary — be strictly honest: list ONLY leads you actually qualified AND verified AND recorded (name, title, company, email, "verified"). State total USDC spent vs cap and how many emails you verified. NEVER list a person you did not fully process.
 
-Never pay a URL you haven't inspected or that isn't listed above. Prefer one People Search (cheap, returns many) over many Enrich calls.`;
+Never pay a URL you haven't inspected or that isn't listed above. One People Search (cheap) then enrich/verify per lead.`;
 }

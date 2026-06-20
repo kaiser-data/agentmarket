@@ -12,12 +12,14 @@ import { createInterface } from "node:readline/promises";
 import { z } from "zod";
 import OpenAI from "openai";
 import { ensureSession } from "@agent-stack-ecosystem-kits/circle-tools";
+import { SIMULATE } from "../lib/rail.ts";
 import { TOOLS, SPEND_TOOL_NAMES, policy, ledger, buildMission } from "./leadgen-core.ts";
 
 const GOAL = process.argv.slice(2).join(" ") || "Series A fintech CTOs in Europe, 8 leads";
 const APPROVAL_OVER = Number(process.env.APPROVAL_OVER_USDC ?? 1.0);
 const MODEL = process.env.NEBIUS_MODEL || "meta-llama/Llama-3.3-70B-Instruct";
 const MAX_STEPS = Number(process.env.MAX_AGENT_STEPS ?? 50);
+const TARGET = Number((GOAL.match(/(\d+)\s*leads?/i) ?? [])[1] ?? 5);
 
 const client = new OpenAI({
   apiKey: process.env.NEBIUS_API_KEY,
@@ -63,13 +65,15 @@ async function main() {
     return a === "y" || a === "yes";
   }
 
-  await ensureSession({ ask, log });
+  if (SIMULATE) log("SIMULATE=1 — mocking wallet, marketplace, and payments (no CLI, no USDC)");
+  else await ensureSession({ ask, log });
 
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: "system", content: SYSTEM },
     { role: "user", content: "Begin. Work the goal end to end, then summarize." },
   ];
 
+  let verified = 0, nudges = 0;
   for (let step = 0; step < MAX_STEPS; step++) {
     const res = await client.chat.completions.create({
       model: MODEL, messages, tools: toolSpecs, tool_choice: "auto", temperature: 0.2,
@@ -80,7 +84,17 @@ async function main() {
     if (msg.content?.trim()) console.log(`\n--- agent ---\n${msg.content.trim()}`);
 
     const calls = msg.tool_calls ?? [];
-    if (calls.length === 0) { log("agent finished (no more tool calls)"); break; }
+    if (calls.length === 0) {
+      // Completion nudge: open models tend to stop early. If the target isn't met
+      // and budget remains, push the agent to process one more lead (max 3 nudges).
+      if (verified < TARGET && policy.remaining() > 0.02 && nudges < 3) {
+        nudges++;
+        log(`nudge ${nudges}: ${verified}/${TARGET} verified, $${policy.remaining().toFixed(2)} left — continue`);
+        messages.push({ role: "user", content: `You have fully processed ${verified} of ${TARGET} target leads and $${policy.remaining().toFixed(2)} budget remains. Do NOT stop yet. Continue with the NEXT unprocessed person from the people-search results: qualify, enrich if it has no email, pay Hunter to verify the email, then validate_lead. Process exactly one more now.` });
+        continue;
+      }
+      log("agent finished (no more tool calls)"); break;
+    }
 
     for (const call of calls) {
       if (call.type !== "function") continue;
@@ -96,8 +110,11 @@ async function main() {
         resultText = JSON.stringify({ error: "user rejected this spend" });
       } else {
         log(`${name}(${JSON.stringify(args).slice(0, 100)})`);
-        try { resultText = JSON.stringify(await tdef.handler(args)); }
-        catch (e) { resultText = JSON.stringify({ error: e instanceof Error ? e.message : String(e) }); }
+        try {
+          const out: any = await tdef.handler(args);
+          if (name === "validate_lead" && out?.valid) verified++;
+          resultText = JSON.stringify(out);
+        } catch (e) { resultText = JSON.stringify({ error: e instanceof Error ? e.message : String(e) }); }
       }
       messages.push({ role: "tool", tool_call_id: call.id, content: resultText });
     }
