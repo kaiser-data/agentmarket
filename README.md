@@ -1,21 +1,39 @@
-# 🛰️ AgentMarket — a budget-governed lead-gen agent on the Circle Agent Stack
+# 🛰️ AgentMarket — Proof-of-Quality: trustworthy commerce for AI agents
 
-An AI agent whose **Circle Agent Wallet is both its payment identity and its operating
-budget**. Given a goal ("20 Series-A fintech CTOs in Europe"), it runs a repeatable job:
+**The problem:** an AI agent with a wallet can pay any service on the marketplace — but it pays
+**blind**. There's no trustworthy signal of whether a service's data is accurate or whether it's a
+scam, and any "reputation" is gameable by Sybils. Agents have money and discovery; they're missing
+a **trust layer**.
 
-1. **Discovers** candidate companies with **Tavily**.
-2. **Discovers paid enrichment services** on the **Circle Agent Marketplace**, inspects pricing.
-3. **Pays per record** via **Circle Nanopayments** (gasless USDC, x402 via Gateway) — each
-   payment justified and logged.
-4. **Qualifies + validates** each result (**Nebius** / Claude). Records a **spend ledger** with receipts.
-5. **Self-defends its budget:** when a service returns fabricated data, it rates it down and
-   **blocklists that payee in the Agent Wallet policy** — the wallet refuses to pay the scammer again.
-6. Stops at the lead target **or the budget cap**, then returns the leads + an itemized receipt ledger.
+**The infrastructure (two primitives):**
 
-> Built on the **Claude Agent SDK** starter kit from the Circle Agent Stack ecosystem kits.
-> Goes beyond "send USDC once": the wallet is part of the agent's job, every cycle.
+1. **Payment-anchored, verification-backed reputation.** A service's reputation can only be minted
+   from a **real, paid, independently cross-verified** interaction. Each attestation binds the
+   **Circle payment tx** + an **independent verification tx** + the outcome, and is published to the
+   **ERC-8004 ReputationRegistry** (real standard, deployed on Base). *You cannot fake a good score
+   without spending real USDC and passing an independent oracle* — Sybil-resistant by construction.
 
-See **[PLAN.md](./PLAN.md)** for checkpoints and the fallback ladder.
+2. **Keyless, policy-bound spending.** The AI model **never holds a key and never signs.** It only
+   *proposes* a transaction; the **Circle Agent Wallet** (MPC) signs it behind the wallet's on-chain
+   spending policy (allowlist + caps, set by the human via OTP). A **prompt-injected agent cannot
+   move funds or write off-policy** — the signer refuses.
+
+**The payoff (network effect):** Agent A pays 3 competing enrichment services, cross-verifies each,
+and attests on-chain — one proves bad. An **independent Agent B queries reputation *before paying*,
+and its wallet refuses the proven-bad service it never touched.** Agent A spent ~$0.67 to learn that;
+because it's on-chain and verification-backed, **Agent B pays $0 to benefit.** One agent's paid lesson
+becomes a public good.
+
+```bash
+npm run network-demo:sim     # watch it end-to-end, free (no keys, no USDC)
+```
+
+> **Reference consumer:** a budget-governed **B2B lead-gen agent** demonstrates the layer — it
+> discovers prospects (Tavily), buys enrichment per-record via **Circle Nanopayments**, **pays Hunter
+> to verify** each email, qualifies with **Nebius**, and only trusts services with proven on-chain
+> reputation. Identity is an **ERC-721** (ERC-8004), so a verified track record is an ownable asset.
+
+See **[PITCH.md](./PITCH.md)** for the demo script and **[PLAN.md](./PLAN.md)** for build notes.
 
 ## Circle Agent Stack usage (prize requirements)
 | Requirement | Where |
@@ -27,10 +45,46 @@ See **[PLAN.md](./PLAN.md)** for checkpoints and the fallback ladder.
 | **Circle CLI** + **Skills** | CLI wrappers; `circle skill install` in setup |
 | **Starter kit** | Claude Agent SDK kit (`@anthropic-ai/claude-agent-sdk`) |
 | Receipt / spend ledger | `lib/ledger.ts` → console + `ledger.json` |
-| Budget / spend cap / approval / **policy-based behavior** | `lib/policy.ts` (cap, approval threshold, auto-blocklist) |
+| Budget / spend cap / approval / **policy-based behavior** | `lib/policy.ts` + keyless Circle signer (`lib/circle-execute.ts`) |
 | "What it paid for & why" | every payment carries a `reason`; shown in ledger + dashboard |
 
-## Three ways to run it (same tools, same wallet policy)
+## Infrastructure track usage (verifiable reputation + identity)
+| Element | Where |
+|---|---|
+| **ERC-8004** Identity (ERC-721) + Reputation registries | `lib/erc8004.ts` (real ABIs vendored, deployed Base Sepolia `0x8004…`) |
+| **Payment-anchored attestations** (Sybil-resistant) | `lib/reputation.ts` — binds pay tx + verify tx + outcome via `feedbackHash` |
+| **Reputation gate** (route around proven-bad services) | `reputationGate()` → wallet refuses below-threshold payees |
+| **Keyless signing** (model proposes, MPC signs behind policy) | `lib/circle-execute.ts` → `circle wallet execute` |
+| **Verifiable logs / explorer proof** | BaseScan tx + ERC-721 identity-token links in demo output |
+| **Cross-verification oracle** | one paid service independently checks another (Hunter verifies Apollo) |
+
+## Architecture
+```
+   AI model (Nebius / Claude)         ← reasons, PROPOSES intents. Holds NO key.
+            │  proposes
+            ▼
+   SpendPolicy (advisory, app-layer)  ← fast UX check (lib/policy.ts)
+            │
+            ▼
+   Circle Agent Wallet (MPC signer)   ← AUTHORITATIVE. On-chain allowlist + caps.
+            │  signs only what passes policy   Prompt injection can't get past here.
+     ┌──────┴───────┐
+     ▼              ▼
+  x402 pay      wallet execute
+  (services)    (ERC-8004 write)
+     │              │
+     ▼              ▼
+  StableEnrich   ReputationRegistry + IdentityRegistry (ERC-8004, Base)
+  (real data)    ← payment-anchored, cross-verified attestations
+```
+
+## Run it
+**The infrastructure demo (the headline):**
+```bash
+npm run network-demo:sim     # two agents + on-chain reputation, free — no keys, no USDC
+```
+
+**The reference consumer (lead-gen agent) — three drivers, same tools + wallet policy:**
 - **`npm run agent`** — default. The agent loop runs on **Nebius Token Factory**
   (OpenAI-compatible function calling). **Zero Anthropic cost** (runs on free Nebius credits)
   and makes Nebius the agent's brain → maximizes the "best use of Nebius" prize.
@@ -49,8 +103,9 @@ changes the wallet, the budget cap, or the blocklist logic.
 > most reliable tool-caller (drove the full paid loop unprompted). Llama-3.3-70B works but is
 > lazier (leans on the completion nudge); Qwen3 ignored tools and hallucinated — avoid it.
 
-> ⚠️ The Circle Agent Stack runs on **Base mainnet** (real USDC, tiny amounts). Keep the budget
-> cap small (`BUDGET_USDC`). There is no testnet faucet path here; fund via `circle wallet fund`.
+> ⚠️ **Networks:** the reputation layer runs on **Base Sepolia** (free testnet — default for the
+> infra demo). Circle Marketplace **payments** are **Base mainnet** (real USDC, cents per call) —
+> keep `BUDGET_USDC` small. Everything runs free under `SIMULATE=1` until you're ready to spend.
 
 ## Quickstart
 ```bash
@@ -69,16 +124,33 @@ npm run dashboard                  # terminal A: http://localhost:4000 (budget b
 npm run agent "Series A fintech CTOs in Europe, 8 leads"
 ```
 
+## Going on-chain for real (ERC-8004 on Base Sepolia — free testnet)
+Everything above runs free in simulation. To make the attestations + explorer links real:
+```bash
+# .env:
+#   SIMULATE=0
+#   ERC8004_NETWORK=base-sepolia
+#   AGENT_WALLET_ADDRESS=0x...        a Circle agent wallet (the buyer/attester)
+#   REGISTRAR_WALLET_ADDRESS=0x...    a DIFFERENT Circle wallet (owns the service identities;
+#                                     the registry blocks self-feedback, so it must differ)
+# Fund both with a little Base Sepolia ETH (free): https://www.alchemy.com/faucets/base-sepolia
+
+npm run register-services    # mints ERC-721 identities via `circle wallet execute` (keyless)
+SIMULATE=0 npm run network-demo
+```
+No private key is ever held by this code: the agent encodes the call, **Circle MPC signs it**
+behind the wallet's policy. The model proposes; the signer decides.
+
 ## Layout
 ```
-vendor/     circle-tools + kit-core  (vendored from the official Circle Agent Stack kits)
-agents/     leadgen-core (shared tool defs + budget/blocklist policy) ·
-            leadgen-agent-nebius (default: Nebius function-calling loop) ·
-            leadgen-agent + leadgen-tools (Claude Agent SDK loop + MCP server) ·
-            consumer (deterministic path) · service/run-services (local x402 sellers)
-lib/        circle-cli (thin adapter over circle-tools) · policy (budget cap + blocklist)
-            · ledger (receipts) · tavily · nebius · events · types
-scripts/    spike-payment (go/no-go)
+vendor/     circle-tools + kit-core (official Circle kits) · erc8004-abi (real ERC-8004 ABIs)
+lib/        reputation (Proof-of-Quality attestations) · erc8004 (keyless encode + read) ·
+            circle-execute (keyless MPC signer boundary) · rail (real|sim payment routing) ·
+            sim (free mock) · policy (budget+blocklist) · ledger · tavily · nebius · events
+agents/     network-demo (THE infra demo: two agents + on-chain reputation) ·
+            leadgen-core (shared tool defs) · leadgen-agent-nebius (default driver) ·
+            leadgen-agent + leadgen-tools (Claude SDK) · consumer (deterministic) · services.config
+scripts/    register-services (mint ERC-721 identities) · spike-payment (go/no-go)
 dashboard/  server (SSE) · index.html
 ```
 
