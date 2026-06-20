@@ -52,9 +52,10 @@ export async function payService(url: string, data: Record<string, unknown>, _me
     const per = Number((data as any).per_page ?? 6);
     response = { people: PEOPLE.slice(0, Math.min(per, PEOPLE.length)) };
   } else if (url.includes("people-enrich")) {
-    const name = String((data as any).name ?? "Unknown Person");
-    const org = String((data as any).organization_name ?? (data as any).domain ?? "example");
-    const domain = String((data as any).domain ?? org.toLowerCase().replace(/[^a-z]/g, "") + ".com");
+    const name = String((data as any).name || "Unknown Person");
+    const org = String((data as any).organization_name || (data as any).domain || "example");
+    // `||` not `??`: an empty-string domain must fall back to one derived from the org.
+    const domain = String((data as any).domain || org.toLowerCase().replace(/[^a-z]/g, "") + ".com");
     const handle = name.toLowerCase().normalize("NFD").replace(/[^a-z ]/g, "").trim().replace(/ +/g, ".");
     response = { person: { name, title: "CTO", email: `${handle}@${domain}`, organization: { name: org } } };
   } else if (url.includes("email-verifier")) {
