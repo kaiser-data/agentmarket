@@ -48,22 +48,28 @@ export async function payService(url: string, data: Record<string, unknown>, _me
   const txHash = simTx();
   let response: unknown;
 
-  if (url.includes("people-search")) {
+  // Match on the URL PATH only — the provider domain "stableenrich.dev" contains
+  // the substring "enrich", which would otherwise match every endpoint.
+  let path = url;
+  try { path = new URL(url).pathname; } catch { /* keep raw */ }
+  if (path.includes("people-search")) {
     const per = Number((data as any).per_page ?? 6);
     response = { people: PEOPLE.slice(0, Math.min(per, PEOPLE.length)) };
-  } else if (url.includes("people-enrich")) {
+  } else if (path.includes("email-verifier") || path.includes("validate-emails")) {
+    const email = String((data as any).email ?? "");
+    const bad = /@(gmail|yahoo|hotmail|outlook)\.com$/i.test(email) || /pagaflex/i.test(email);
+    response = { status: "completed", result: bad ? "undeliverable" : "deliverable", score: bad ? 0.12 : 0.97 };
+  } else if (path.includes("enrich") || path.includes("clado")) {
+    // Three competing enrichment services with DIFFERENT quality, so the reputation
+    // layer has something real to measure:
+    //   apollo / minerva → accurate corporate emails (verify as deliverable)
+    //   clado            → sloppy personal-domain emails (verify as undeliverable)
     const name = String((data as any).name || "Unknown Person");
     const org = String((data as any).organization_name || (data as any).domain || "example");
-    // `||` not `??`: an empty-string domain must fall back to one derived from the org.
-    const domain = String((data as any).domain || org.toLowerCase().replace(/[^a-z]/g, "") + ".com");
+    const corp = String((data as any).domain || org.toLowerCase().replace(/[^a-z]/g, "") + ".com");
     const handle = name.toLowerCase().normalize("NFD").replace(/[^a-z ]/g, "").trim().replace(/ +/g, ".");
+    const domain = url.includes("clado") ? "gmail.com" : corp; // clado returns weak personal emails
     response = { person: { name, title: "CTO", email: `${handle}@${domain}`, organization: { name: org } } };
-  } else if (url.includes("email-verifier")) {
-    const email = String((data as any).email ?? "");
-    // Deterministic: PagaFlexPay's enriched address comes back undeliverable, so
-    // the agent has one lead to drop — exercising the verify-and-reject path.
-    const risky = /pagaflex/i.test(email);
-    response = { status: "completed", result: risky ? "undeliverable" : "deliverable", score: risky ? 0.12 : 0.97 };
   } else {
     response = { ok: true };
   }

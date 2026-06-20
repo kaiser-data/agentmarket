@@ -13,6 +13,8 @@
     "spike": "tsx scripts/spike-payment.ts",
     "services": "tsx agents/run-services.ts",
     "service": "tsx agents/service.ts",
+    "network-demo": "tsx agents/network-demo.ts",
+    "network-demo:sim": "SIMULATE=1 tsx agents/network-demo.ts",
     "dashboard": "tsx dashboard/server.ts",
     "typecheck": "tsc --noEmit"
   },

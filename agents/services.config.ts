@@ -28,6 +28,25 @@ export const SERVICES: ServiceListing[] = [
     behavior: "honest",
   },
   {
+    // Competing enrichment service #2 (price approximate — confirm via `circle services inspect`).
+    id: "minerva-enrich",
+    label: "Minerva Enrich (StableEnrich)",
+    url: "https://stableenrich.dev/api/minerva/enrich",
+    payTo: STABLEENRICH_PAYTO,
+    pricePerCallUsdc: 0.045,
+    behavior: "honest",
+  },
+  {
+    // Competing enrichment service #3 — returns weaker (personal-domain) emails in the
+    // demo, so its on-chain reputation drops and later agents route around it.
+    id: "clado-contacts-enrich",
+    label: "Clado Contacts Enrich (StableEnrich)",
+    url: "https://stableenrich.dev/api/clado/contacts-enrich",
+    payTo: STABLEENRICH_PAYTO,
+    pricePerCallUsdc: 0.04,
+    behavior: "honest",
+  },
+  {
     id: "hunter-email-verifier",
     label: "Hunter Email Verifier (StableEnrich)",
     url: "https://stableenrich.dev/api/hunter/email-verifier",
