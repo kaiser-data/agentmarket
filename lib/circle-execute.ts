@@ -8,10 +8,10 @@
 //
 // SIMULATE=1 returns a mock tx so the flow runs free.
 //
-// TODO(verify): exact `circle wallet execute` flags. Confirm with:
-//   circle wallet execute --help
-// Expected shape (to be confirmed):
-//   circle wallet execute --address <addr> --chain <CHAIN> --to <contract> --data <0x...> --output json
+// Real CLI (confirmed via `circle wallet execute --help`):
+//   circle wallet execute "<fnSignature>" <params...> --contract <addr> \
+//     --address <wallet> --chain <CHAIN> --output json
+// The CLI ABI-encodes the call itself, so we pass the signature + params, not calldata.
 
 import "dotenv/config";
 import { execFile } from "node:child_process";
@@ -34,13 +34,12 @@ function simTx() {
 export async function executeViaCircle(intent: ExecuteIntent, opts: { address: string; chain?: string }): Promise<string> {
   if (SIMULATE) return simTx();
   const chain = opts.chain ?? process.env.ERC8004_CHAIN_CLI ?? "BASE-SEPOLIA";
-  // TODO(verify): flag names against `circle wallet execute --help`.
   const { stdout } = await exec("circle", [
     "wallet", "execute",
+    intent.signature, ...intent.params,
+    "--contract", intent.contract,
     "--address", opts.address,
     "--chain", chain,
-    "--to", intent.to,
-    "--data", intent.data,
     "--output", "json",
   ], { env: process.env, maxBuffer: 8 * 1024 * 1024 });
   const out = stdout.trim();

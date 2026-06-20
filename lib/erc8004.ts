@@ -17,7 +17,7 @@
 //     -> (uint64 count, int128 summaryValue, uint8 decimals)
 
 import "dotenv/config";
-import { createPublicClient, http, keccak256, toHex, encodeFunctionData, decodeEventLog } from "viem";
+import { createPublicClient, http, keccak256, toHex, decodeEventLog } from "viem";
 import { baseSepolia, base } from "viem/chains";
 import ID_ABI from "../vendor/erc8004-abi/IdentityRegistry.json" with { type: "json" };
 import REP_ABI from "../vendor/erc8004-abi/ReputationRegistry.json" with { type: "json" };
@@ -40,25 +40,27 @@ export function evidenceHash(payTx?: string, verifyTx?: string, outcome?: string
   return keccak256(toHex(JSON.stringify({ payTx: payTx ?? "", verifyTx: verifyTx ?? "", outcome: outcome ?? "" })));
 }
 
-// ---- WRITE INTENTS (calldata only — signed by the Circle wallet, never here) ----
+// ---- WRITE INTENTS ----
+// The agent proposes an intent: a contract + function signature + params. It is
+// NOT signed here. `circle wallet execute "<sig>" <params...> --contract ...` hands
+// it to Circle MPC, which encodes + signs behind the wallet's on-chain policy.
 
-export interface ExecuteIntent { to: `0x${string}`; data: `0x${string}`; description: string }
+export interface ExecuteIntent { contract: `0x${string}`; signature: string; params: string[]; description: string }
 
 export function encodeRegister(agentURI: string): ExecuteIntent {
   return {
-    to: IDENTITY,
-    data: encodeFunctionData({ abi: ID_ABI as any, functionName: "register", args: [agentURI] }),
+    contract: IDENTITY,
+    signature: "register(string)",
+    params: [agentURI],
     description: `IdentityRegistry.register("${agentURI}")`,
   };
 }
 
 export function encodeGiveFeedback(agentId: bigint, scorePct: number, opts: { tag2?: string; endpoint?: string; feedbackURI?: string; feedbackHash: `0x${string}` }): ExecuteIntent {
   return {
-    to: REPUTATION,
-    data: encodeFunctionData({
-      abi: REP_ABI as any, functionName: "giveFeedback",
-      args: [agentId, BigInt(Math.round(scorePct)), 0, TAG1, opts.tag2 ?? "", opts.endpoint ?? "", opts.feedbackURI ?? "", opts.feedbackHash],
-    }),
+    contract: REPUTATION,
+    signature: "giveFeedback(uint256,int128,uint8,string,string,string,string,bytes32)",
+    params: [String(agentId), String(Math.round(scorePct)), "0", TAG1, opts.tag2 ?? "", opts.endpoint ?? "", opts.feedbackURI ?? "", opts.feedbackHash],
     description: `ReputationRegistry.giveFeedback(agent ${agentId}, ${scorePct}%)`,
   };
 }
