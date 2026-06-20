@@ -15,6 +15,7 @@
     "service": "tsx agents/service.ts",
     "network-demo": "tsx agents/network-demo.ts",
     "network-demo:sim": "SIMULATE=1 tsx agents/network-demo.ts",
+    "register-services": "tsx scripts/register-services.ts",
     "dashboard": "tsx dashboard/server.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -23,6 +24,7 @@
     "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "openai": "^4.67.0",
+    "viem": "^2.53.1",
     "zod": "^4.3.6",
     "zod-to-json-schema": "^3.25.2"
   },

@@ -19,14 +19,25 @@
 import "dotenv/config";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { SIMULATE } from "./rail.ts";
+import * as erc8004 from "./erc8004.ts";
+import { executeViaCircle } from "./circle-execute.ts";
 
 const STORE = process.env.REPUTATION_STORE ?? "reputation-store.json";
+const AGENT_MAP = process.env.ERC8004_AGENT_MAP ?? "erc8004-agents.json";
 
-// ERC-8004 on Base Sepolia (real standard; free testnet gas).
+/** serviceId -> ERC-8004 agentId (written by scripts/register-services.ts). */
+function agentIdFor(serviceId: string): bigint {
+  if (!existsSync(AGENT_MAP)) throw new Error(`${AGENT_MAP} missing — run: npm run register-services`);
+  const map = JSON.parse(readFileSync(AGENT_MAP, "utf8")) as Record<string, string>;
+  if (!map[serviceId]) throw new Error(`no ERC-8004 agentId for "${serviceId}" — re-run register-services`);
+  return BigInt(map[serviceId]);
+}
+
+// ERC-8004 (real standard). Addresses + explorer are network-aware (lib/erc8004.ts).
 export const ERC8004 = {
-  reputation: "0x8004B663056A597Dffe9eCcC1965A193B7388713",
-  identity: "0x8004A818BFB912233c491871b3d84c89A494BD9e",
-  explorerTx: (tx: string) => `https://sepolia.basescan.org/tx/${tx}`,
+  reputation: erc8004.REPUTATION,
+  identity: erc8004.IDENTITY,
+  explorerTx: erc8004.explorerTx,
 };
 
 export interface Attestation {
@@ -101,10 +112,18 @@ export async function reputationGate(serviceId: string, minScore = 0.5): Promise
   return { ok: true, rep };
 }
 
-// ---- Real ERC-8004 wiring (Base Sepolia). Stubbed until ONCHAIN_PRIVATE_KEY + ABIs are set. ----
-async function writeFeedbackOnchain(_row: Attestation): Promise<{ onchainTx: string }> {
-  throw new Error("Real ERC-8004 write not wired yet — run with SIMULATE=1, or wire viem giveFeedback (see TODO).");
+// ---- Real ERC-8004 wiring (keyless: agent encodes, Circle signs behind policy) ----
+async function writeFeedbackOnchain(row: Attestation): Promise<{ onchainTx: string }> {
+  const signerAddress = process.env.AGENT_WALLET_ADDRESS;
+  if (!signerAddress) throw new Error("AGENT_WALLET_ADDRESS not set (the Circle wallet that signs feedback behind policy).");
+  const agentId = agentIdFor(row.serviceId);
+  const feedbackHash = erc8004.evidenceHash(row.payTx, row.verifyTx, row.outcome);
+  const intent = erc8004.encodeGiveFeedback(agentId, row.scorePct, { tag2: row.serviceId, endpoint: row.serviceId, feedbackHash });
+  const tx = await executeViaCircle(intent, { address: signerAddress }); // Circle MPC signs, policy-checked
+  return { onchainTx: tx };
 }
-async function readSummaryOnchain(_serviceId: string): Promise<{ count: number; score: number; fails: number }> {
-  throw new Error("Real ERC-8004 read not wired yet — run with SIMULATE=1.");
+async function readSummaryOnchain(serviceId: string): Promise<{ count: number; score: number; fails: number }> {
+  const { count, score } = await erc8004.getSummary(agentIdFor(serviceId));
+  // fails aren't separately tracked on-chain in the summary; approximate from score.
+  return { count, score, fails: count ? Math.round(count * (1 - score)) : 0 };
 }
