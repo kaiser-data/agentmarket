@@ -59,24 +59,24 @@ See **[PITCH.md](./PITCH.md)** for the demo script and **[PLAN.md](./PLAN.md)** 
 | **Cross-verification oracle** | one paid service independently checks another (Hunter verifies Apollo) |
 
 ## Architecture
-```
-   AI model (Nebius / Claude)         ← reasons, PROPOSES intents. Holds NO key.
-            │  proposes
-            ▼
-   SpendPolicy (advisory, app-layer)  ← fast UX check (lib/policy.ts)
-            │
-            ▼
-   Circle Agent Wallet (MPC signer)   ← AUTHORITATIVE. On-chain allowlist + caps.
-            │  signs only what passes policy   Prompt injection can't get past here.
-     ┌──────┴───────┐
-     ▼              ▼
-  x402 pay      wallet execute
-  (services)    (ERC-8004 write)
-     │              │
-     ▼              ▼
-  StableEnrich   ReputationRegistry + IdentityRegistry (ERC-8004, Base)
-  (real data)    ← payment-anchored, cross-verified attestations
-```
+
+![AgentMarket architecture](docs/architecture.svg)
+
+**How the building blocks play together:**
+- **Reasoning (untrusted):** the AI model reasons over tools and *proposes* transactions. It holds
+  no key. `SpendPolicy` is a fast advisory check — useful, but it runs in the same process the model
+  could be tricked in, so it is **not** trusted.
+- **Trust boundary:** a prompt-injected model cannot cross it. Nothing the model says becomes a
+  signed transaction on its own.
+- **Execution (authoritative):** the **Circle Agent Wallet (MPC)** signs *only* what passes the
+  wallet's on-chain spending policy — allowlist + caps the human sets via OTP. Two channels:
+  **x402 pay** (buy real data) and **wallet execute** (write ERC-8004 attestations).
+- **Proof-of-Quality loop:** a service is paid, then **independently cross-verified** (Hunter checks
+  Apollo's email); the payment tx + verify tx + outcome are bound into one **attestation** on the
+  **ERC-8004 ReputationRegistry**. Identity is an **ERC-721**, so reputation is an ownable asset.
+- **Reputation gate (keyless read):** before paying, an agent reads on-chain reputation and refuses
+  proven-bad services — no signing needed. This is the green feedback loop, and the basis of the
+  network effect (Agent A pays to learn; Agent B reads for free).
 
 ## Run it
 **The infrastructure demo (the headline):**
