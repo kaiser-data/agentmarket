@@ -71,6 +71,7 @@ export const TOOLS: ToolDef[] = [
       dataJson: z.string().describe('JSON payload matching the service schema, e.g. {"candidate":{...}}.'),
     },
     handler: async ({ url, address, payTo, serviceId, amountUsdc, reason, method, dataJson }) => {
+      await emit({ type: "consider", service: serviceId, price: amountUsdc, reputation: policy.score(serviceId) });
       const auth = policy.authorize(payTo, amountUsdc);
       if (!auth.ok) { await emit({ type: "blocked", service: serviceId, reason: auth.reason! }); throw new Error(`policy blocked payment: ${auth.reason}`); }
 
@@ -104,7 +105,11 @@ export const TOOLS: ToolDef[] = [
   // ---------- Domain tools ----------
   { name: "tavily_discover", description: "Discover candidate companies/people matching an ICP description, via Tavily web search. Returns [{company,domain,source}].",
     shape: { description: z.string(), count: z.number().optional() },
-    handler: ({ description, count }) => discoverCandidates({ description, count: count ?? 10 }) },
+    handler: async ({ description, count }) => {
+      const candidates = await discoverCandidates({ description, count: count ?? 10 });
+      await emit({ type: "discover", count: candidates.length, query: description });
+      return candidates;
+    } },
 
   { name: "nebius_qualify", description: "Score an enriched lead 0..1 against the ICP. Returns {score}.",
     shape: { leadJson: z.string(), icp: z.string() },

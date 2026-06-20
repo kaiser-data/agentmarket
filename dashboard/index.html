@@ -55,6 +55,7 @@
       else if (ev.type === "budget") { document.getElementById("spent").textContent = "$"+ev.spent.toFixed(2); document.getElementById("cap").textContent = "$"+ev.cap.toFixed(2); document.getElementById("budgetbar").style.width = Math.min(100, ev.spent/ev.cap*100)+"%"; }
       else if (ev.type === "lead") log(`${ev.valid ? "✓" : "✗"} [${ev.service}] score ${ev.score?.toFixed(2)} — ${ev.preview}`, "lead " + (ev.valid ? "ok" : "bad"));
       else if (ev.type === "policy") { Object.assign(s(ev.service), { blocked: true }); render(); log(`🚫 BLOCKLIST ${ev.service} — ${ev.reason}. Wallet will no longer pay it.`, "policy"); }
+      else if (ev.type === "blocked") log(`⛔ payment refused by wallet policy → ${ev.service}: ${ev.reason}`, "policy");
       else if (ev.type === "discover") log(`🔎 discovered ${ev.count} candidates for "${ev.query}"`);
       else log(ev.message ?? JSON.stringify(ev));
     };
