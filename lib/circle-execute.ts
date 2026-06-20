@@ -16,10 +16,14 @@
 import "dotenv/config";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { SIMULATE } from "./rail.ts";
 import type { ExecuteIntent } from "./erc8004.ts";
 
 const exec = promisify(execFile);
+
+// Real on-chain execution is gated on ONCHAIN_REPUTATION (the ERC-8004 layer),
+// NOT on SIMULATE (payments). So you can run real attestations on free Base
+// Sepolia while payments stay simulated on mainnet.
+const REAL_ONCHAIN = process.env.ONCHAIN_REPUTATION === "1";
 
 let simN = 9000;
 function simTx() {
@@ -32,7 +36,7 @@ function simTx() {
  * Returns the on-chain tx hash. The agent never sees a key.
  */
 export async function executeViaCircle(intent: ExecuteIntent, opts: { address: string; chain?: string }): Promise<string> {
-  if (SIMULATE) return simTx();
+  if (!REAL_ONCHAIN) return simTx();
   const chain = opts.chain ?? process.env.ERC8004_CHAIN_CLI ?? "BASE-SEPOLIA";
   const { stdout } = await exec("circle", [
     "wallet", "execute",
