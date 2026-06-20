@@ -124,22 +124,42 @@ npm run dashboard                  # terminal A: http://localhost:4000 (budget b
 npm run agent "Series A fintech CTOs in Europe, 8 leads"
 ```
 
-## Going on-chain for real (ERC-8004 on Base Sepolia — free testnet)
-Everything above runs free in simulation. To make the attestations + explorer links real:
-```bash
-# .env:
-#   SIMULATE=0
-#   ERC8004_NETWORK=base-sepolia
-#   AGENT_WALLET_ADDRESS=0x...        a Circle agent wallet (the buyer/attester)
-#   REGISTRAR_WALLET_ADDRESS=0x...    a DIFFERENT Circle wallet (owns the service identities;
-#                                     the registry blocks self-feedback, so it must differ)
-# Fund both with a little Base Sepolia ETH (free): https://www.alchemy.com/faucets/base-sepolia
+## ✅ Live on-chain (verified on Base Sepolia)
+The reputation layer is **real and running on-chain** — not a mock. Three service identities are
+minted as ERC-721s and nine payment-anchored attestations are written via keyless Circle MPC:
 
-npm run register-services    # mints ERC-721 identities via `circle wallet execute` (keyless)
-SIMULATE=0 npm run network-demo
+| Service | ERC-8004 agentId | On-chain reputation |
+|---|---|---|
+| Apollo People Enrich | `7100` | **100%** (3 verified attestations) |
+| Minerva Enrich | `7101` | **100%** (3 verified attestations) |
+| Clado Contacts Enrich | `7102` | **0%** (3 attestations, all failed verification) |
+
+Verify it yourself (public, clickable):
+[identity NFT #7100](https://sepolia.basescan.org/token/0x8004A818BFB912233c491871b3d84c89A494BD9e?a=7100)
+· [a register tx](https://sepolia.basescan.org/tx/0x500e24e18bf16d401b5b4f1bcfee2e83bfa9dab7050ad968c596d645d9ff6983)
+· ReputationRegistry `0x8004B663…` · IdentityRegistry `0x8004A818…`.
+
+### Reproduce it (free — testnet gas is sponsored by Circle)
+```bash
+# 1. Two Base Sepolia agent wallets (the registry blocks self-feedback, so they MUST differ):
+circle wallet login <email> --testnet     # testnet is a separate session
+circle wallet create --testnet            # make a 2nd testnet wallet (you start with 1)
+circle wallet list --chain BASE-SEPOLIA   # copy the two addresses
+
+# 2. .env:
+#   SIMULATE=1                 # payments stay mocked (Circle Marketplace is mainnet-only)
+#   ONCHAIN_REPUTATION=1       # attestations are REAL on Base Sepolia
+#   ERC8004_NETWORK=base-sepolia · ERC8004_CHAIN_CLI=BASE-SEPOLIA
+#   REGISTRAR_WALLET_ADDRESS=0x...   (owns the identities)
+#   AGENT_WALLET_ADDRESS=0x...       (DIFFERENT — the buyer/attester)
+
+npm run register-services                          # mint ERC-721 identities (keyless)
+SIMULATE=1 ONCHAIN_REPUTATION=1 npm run network-demo   # real attestations + on-chain read-back
 ```
-No private key is ever held by this code: the agent encodes the call, **Circle MPC signs it**
-behind the wallet's policy. The model proposes; the signer decides.
+No private key is ever held by this code: the agent encodes the call, **Circle MPC signs it** behind
+the wallet's policy, and **auto-deploys the SCA + sponsors gas** (no faucet ETH needed). The model
+proposes; the signer decides. Payments (`SIMULATE`) and reputation (`ONCHAIN_REPUTATION`) are
+**decoupled**, so the novel on-chain layer runs real on free testnet while payments stay simulated.
 
 ## Layout
 ```
@@ -154,14 +174,20 @@ scripts/    register-services (mint ERC-721 identities) · spike-payment (go/no-
 dashboard/  server (SSE) · index.html
 ```
 
-## The original beat (judging: "originality" + "policy-based payment behavior")
-Most entries demo a happy-path payment. AgentMarket demos a **self-defending wallet**: a rogue
-service underbids to win the job, returns fabricated data, gets caught at validation, and is
-**blocklisted in the wallet policy on stage** — spend reroutes to honest providers automatically.
+## Circle CLI flags (confirmed against the live CLI)
+- Auth: `circle wallet login <email> --type agent` · testnet is separate: `… --testnet`.
+- Skills: `circle skill install --tool claude-code`.
+- Wallets: `circle wallet create` mints a mainnet SCA across all EVM chains; `… --testnet` for
+  Base Sepolia (capped at 5 per environment).
+- Contract writes: `circle wallet execute "<fnSig>" <params...> --contract <addr> --address <wallet>
+  --chain <CHAIN>` — pass the **function signature + params** (the CLI ABI-encodes). It **auto-deploys
+  the counterfactual SCA and sponsors gas** on testnet — no faucet ETH needed.
+- ERC-8004 read: `getSummary` reverts on an empty client list — call `getClients(agentId)` first.
 
-## `TODO(verify)` markers
-Grep for `TODO(verify)` — exact Circle CLI flags, JSON field names (balance, receipt), and the
-wallet-policy/blocklist command to confirm against the installed CLI during the spike.
+## What's next: the product frontend
+A **Trust Explorer** web app (Next.js) on top of the real on-chain data — services ranked by
+verifiable reputation, a live agent-run view, and an attestation feed with BaseScan proof. See
+**[HANDOFF.md](./HANDOFF.md)** for the full brief and current state.
 
 ## Social-impact variant (Blockchain-for-Good)
 Swap the ICP goal + service catalog to a **grant/RFP finder for nonprofits** — same engine.
