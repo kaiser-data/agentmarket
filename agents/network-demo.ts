@@ -19,7 +19,7 @@ import { validate } from "../lib/nebius.ts";
 import { Ledger } from "../lib/ledger.ts";
 import { SpendPolicy } from "../lib/policy.ts";
 import { emit } from "../lib/events.ts";
-import { attest, getReputation, reputationGate, reset, ERC8004 } from "../lib/reputation.ts";
+import { attest, getReputation, reputationGate, reset, ERC8004, identityTokenLink } from "../lib/reputation.ts";
 import { SERVICES } from "./services.config.ts";
 
 const SVC = Object.fromEntries(SERVICES.map((s) => [s.id, s]));
@@ -69,12 +69,16 @@ async function main() {
     }
   }
 
-  bar("ON-CHAIN REPUTATION (ERC-8004 ReputationRegistry, Base Sepolia)");
+  bar("ON-CHAIN REPUTATION (ERC-8004, Base Sepolia)");
+  console.log(`  Each service is an ERC-721 agent identity; reputation attaches to the token.\n`);
   for (const svcId of ENRICHERS) {
     const r = await getReputation(svcId);
     console.log(`  ${svcId.padEnd(24)} score ${(r.score * 100).toFixed(0)}%  (${r.count} attestations, ${r.fails} fails)`);
+    const tok = identityTokenLink(svcId);
+    if (tok) console.log(`    ↳ identity NFT: ${tok}`);
   }
-  console.log(`  registry: ${ERC8004.reputation}`);
+  console.log(`\n  ReputationRegistry: ${ERC8004.reputation}`);
+  console.log(`  IdentityRegistry (ERC-721): ${ERC8004.identity}`);
   console.log(`\n  Agent A spent $${aLedger.total.toFixed(3)} USDC to establish these quality signals.`);
 
   // ============ AGENT B — benefits from it, pays nothing to learn ============

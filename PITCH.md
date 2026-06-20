@@ -50,6 +50,13 @@ real autonomous quality control with money, under a hard budget.
 
 ---
 
+## On ERC-721 (if asked "where's the NFT?")
+> "Every service is an **ERC-721 agent identity** — ERC-8004's IdentityRegistry mints an NFT
+> and reputation attaches to that token. So a service's verified track record is an **ownable,
+> transferable on-chain asset** — you could sell a high-reputation agent. We deliberately do NOT
+> mint souvenir NFTs per payment; that's empty on-chain activity. The receipts and attestations
+> are the proof; the identity NFT is the thing reputation lives on."
+
 ## Architecture one-liner (for the technical judge)
 > "One tool core, three drivers. The agent loop runs on Nebius for cost, the Claude Agent SDK
 > for reliability, or fully deterministic as a fallback — but the Circle wallet, the budget cap,

@@ -31,7 +31,10 @@ const ONCHAIN = NET === "base"
 export const IDENTITY = ONCHAIN.identity as `0x${string}`;
 export const REPUTATION = ONCHAIN.reputation as `0x${string}`;
 export const TAG1 = "proof-of-quality";
-export const explorerTx = (tx: string) => `https://${NET === "base" ? "" : "sepolia."}basescan.org/tx/${tx}`;
+const SCAN = `https://${NET === "base" ? "" : "sepolia."}basescan.org`;
+export const explorerTx = (tx: string) => `${SCAN}/tx/${tx}`;
+/** Link to a service's ERC-721 agent-identity token (IdentityRegistry is an NFT). */
+export const identityToken = (agentId: string | bigint) => `${SCAN}/token/${IDENTITY}?a=${agentId}`;
 
 const pub = createPublicClient({ chain: ONCHAIN.chain, transport: http(ONCHAIN.rpc) });
 

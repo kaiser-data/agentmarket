@@ -38,7 +38,27 @@ export const ERC8004 = {
   reputation: erc8004.REPUTATION,
   identity: erc8004.IDENTITY,
   explorerTx: erc8004.explorerTx,
+  identityToken: erc8004.identityToken,
 };
+
+/** A service's ERC-721 agent-identity token link, if it has been registered. */
+export function identityTokenLink(serviceId: string): string | undefined {
+  try {
+    if (!existsSync(AGENT_MAP)) {
+      // In sim we mint deterministic ids so the token link is still demonstrable.
+      if (SIMULATE) return erc8004.identityToken(simAgentId(serviceId));
+      return undefined;
+    }
+    const map = JSON.parse(readFileSync(AGENT_MAP, "utf8")) as Record<string, string>;
+    return map[serviceId] ? erc8004.identityToken(map[serviceId]) : undefined;
+  } catch { return undefined; }
+}
+
+/** Stable fake agentId per service for the simulated token link. */
+function simAgentId(serviceId: string): string {
+  let h = 0; for (const c of serviceId) h = (h * 31 + c.charCodeAt(0)) % 100000;
+  return String(8004000 + h);
+}
 
 export interface Attestation {
   serviceId: string;          // e.g. "apollo-people-enrich"
