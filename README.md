@@ -36,8 +36,15 @@ The whole system is one **clockwise loop**:
    `payTx + verifyTx + outcome` are bound into one attestation on the **ERC-8004** registry. Identity
    is an **ERC-721**, so a track record is an ownable asset.
 3. **Trust feedback** — THEMIS reads reputation **keyless** and scores it on two axes, then the
-   wallet **refuses proven-bad services before a cent moves.** Agent A pays to learn; **Agent B reads
-   for $0.**
+   wallet **refuses proven-bad services before a cent moves.**
+
+**The economics, honestly:** writing reputation costs a **verification premium (~2× a call** — you
+pay an independent oracle to confirm the output). Reading is **free and permissionless** — because
+the data lives on the public ERC-8004 registry on Base, *any* agent, wallet, or app can check a
+score with **no key, no account, no payment.** So one agent pays once and **everyone benefits
+forever**: it's a public good, not a per-agent cost saver. The value isn't the cents saved on one
+call — it's letting autonomous wallets spend on thousands of unknown services without getting
+scammed.
 
 ## The one idea that makes it un-fakeable: two scores, not one
 
