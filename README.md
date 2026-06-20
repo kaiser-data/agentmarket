@@ -30,15 +30,23 @@ See **[PLAN.md](./PLAN.md)** for checkpoints and the fallback ladder.
 | Budget / spend cap / approval / **policy-based behavior** | `lib/policy.ts` (cap, approval threshold, auto-blocklist) |
 | "What it paid for & why" | every payment carries a `reason`; shown in ledger + dashboard |
 
-## Two ways to run it
-- **`npm run agent`** — the headline: the **Claude Agent SDK** drives the whole workflow,
-  calling the Circle MCP tools itself (wallet → discover → inspect → pay → qualify → validate →
-  blocklist). Human-in-the-loop approves spends; payments under the per-call cap auto-approve.
-- **`npm run consumer`** — a deterministic orchestrator over the same tools. Reliable fallback
-  for a live demo if you don't want to depend on model behavior on stage.
+## Three ways to run it (same tools, same wallet policy)
+- **`npm run agent`** — default. The agent loop runs on **Nebius Token Factory**
+  (OpenAI-compatible function calling). **Zero Anthropic cost** (runs on free Nebius credits)
+  and makes Nebius the agent's brain → maximizes the "best use of Nebius" prize.
+- **`npm run agent:claude`** — the same loop driven by the **Claude Agent SDK** instead
+  (needs `ANTHROPIC_API_KEY`). Most reliable tool-caller; use if you have Anthropic budget.
+- **`npm run consumer`** — a deterministic orchestrator over the same tools. No agent-LLM at
+  all (only Nebius for qualify/validate). Reliable on-stage fallback.
 
-Both call the **vendored, official `circle-tools`** (`vendor/`) — so wallet creation, the
-counterfactual-SCA deploy, Gateway routing, and x402 v1/v2 are handled correctly, not re-guessed.
+All three share one tool core (`agents/leadgen-core.ts`) and the **vendored, official
+`circle-tools`** (`vendor/`), so wallet creation, the counterfactual-SCA deploy, Gateway
+routing, and x402 v1/v2 are handled correctly, not re-guessed. Switching the driver never
+changes the wallet, the budget cap, or the blocklist logic.
+
+> **Cost:** the default (Nebius) needs only `NEBIUS_API_KEY` + `TAVILY_API_KEY` for the LLM
+> work — no paid Anthropic key. Pick a strong tool-calling model via `NEBIUS_MODEL`
+> (default `meta-llama/Llama-3.3-70B-Instruct`).
 
 > ⚠️ The Circle Agent Stack runs on **Base mainnet** (real USDC, tiny amounts). Keep the budget
 > cap small (`BUDGET_USDC`). There is no testnet faucet path here; fund via `circle wallet fund`.
@@ -63,8 +71,10 @@ npm run agent "Series A fintech CTOs in Europe, 8 leads"
 ## Layout
 ```
 vendor/     circle-tools + kit-core  (vendored from the official Circle Agent Stack kits)
-agents/     leadgen-agent (Claude Agent SDK loop) · leadgen-tools (MCP server: Circle + domain tools)
-            · consumer (deterministic path) · service/run-services (local x402 sellers) · services.config
+agents/     leadgen-core (shared tool defs + budget/blocklist policy) ·
+            leadgen-agent-nebius (default: Nebius function-calling loop) ·
+            leadgen-agent + leadgen-tools (Claude Agent SDK loop + MCP server) ·
+            consumer (deterministic path) · service/run-services (local x402 sellers)
 lib/        circle-cli (thin adapter over circle-tools) · policy (budget cap + blocklist)
             · ledger (receipts) · tavily · nebius · events · types
 scripts/    spike-payment (go/no-go)

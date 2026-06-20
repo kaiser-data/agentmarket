@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Budget-governed lead-gen agent on the Circle Agent Stack (Claude Agent SDK) — discovers paid services, pays per-record via Nanopayments, and blocklists scam providers via wallet policy",
   "scripts": {
-    "agent": "tsx agents/leadgen-agent.ts",
+    "agent": "tsx agents/leadgen-agent-nebius.ts",
+    "agent:nebius": "tsx agents/leadgen-agent-nebius.ts",
+    "agent:claude": "tsx agents/leadgen-agent.ts",
     "consumer": "tsx agents/consumer.ts",
     "spike": "tsx scripts/spike-payment.ts",
     "services": "tsx agents/run-services.ts",
@@ -18,7 +20,8 @@
     "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "openai": "^4.67.0",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

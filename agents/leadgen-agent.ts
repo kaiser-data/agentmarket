@@ -15,7 +15,8 @@ import "dotenv/config";
 import { createInterface } from "node:readline/promises";
 import { query, type CanUseTool, type PermissionResult, type SDKMessage, type SDKUserMessage } from "@anthropic-ai/claude-agent-sdk";
 import { ensureSession } from "@agent-stack-ecosystem-kits/circle-tools";
-import { buildLeadgenServer, MCP_SERVER_NAME, SPEND_TOOLS, policy, ledger } from "./leadgen-tools.ts";
+import { buildLeadgenServer, MCP_SERVER_NAME, SPEND_TOOLS } from "./leadgen-tools.ts";
+import { policy, ledger } from "./leadgen-core.ts";
 
 const GOAL = process.argv.slice(2).join(" ") || "Series A fintech CTOs in Europe, 8 leads";
 const APPROVAL_OVER = Number(process.env.APPROVAL_OVER_USDC ?? 1.0);
