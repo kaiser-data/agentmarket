@@ -17,7 +17,7 @@ import { TOOLS, SPEND_TOOL_NAMES, policy, ledger, buildMission } from "./leadgen
 
 const GOAL = process.argv.slice(2).join(" ") || "Series A fintech CTOs in Europe, 8 leads";
 const APPROVAL_OVER = Number(process.env.APPROVAL_OVER_USDC ?? 1.0);
-const MODEL = process.env.NEBIUS_MODEL || "meta-llama/Llama-3.3-70B-Instruct";
+const MODEL = process.env.NEBIUS_MODEL || "deepseek-ai/DeepSeek-V3.2";
 const MAX_STEPS = Number(process.env.MAX_AGENT_STEPS ?? 50);
 const TARGET = Number((GOAL.match(/(\d+)\s*leads?/i) ?? [])[1] ?? 5);
 

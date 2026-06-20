@@ -10,7 +10,7 @@ const client = new OpenAI({
   baseURL: process.env.NEBIUS_BASE_URL ?? "https://api.tokenfactory.nebius.com/v1/",
 });
 
-const MODEL = process.env.NEBIUS_MODEL ?? "meta-llama/Llama-3.3-70B-Instruct";
+const MODEL = process.env.NEBIUS_MODEL ?? "deepseek-ai/DeepSeek-V3.2";
 
 async function jsonChat(system: string, user: string) {
   const res = await client.chat.completions.create({

@@ -44,9 +44,10 @@ All three share one tool core (`agents/leadgen-core.ts`) and the **vendored, off
 routing, and x402 v1/v2 are handled correctly, not re-guessed. Switching the driver never
 changes the wallet, the budget cap, or the blocklist logic.
 
-> **Cost:** the default (Nebius) needs only `NEBIUS_API_KEY` + `TAVILY_API_KEY` for the LLM
-> work — no paid Anthropic key. Pick a strong tool-calling model via `NEBIUS_MODEL`
-> (default `meta-llama/Llama-3.3-70B-Instruct`).
+> **Cost:** the default (Nebius) needs only `NEBIUS_API_KEY` for the LLM work — no paid
+> Anthropic key. Default model `NEBIUS_MODEL=deepseek-ai/DeepSeek-V3.2`, which tested as the
+> most reliable tool-caller (drove the full paid loop unprompted). Llama-3.3-70B works but is
+> lazier (leans on the completion nudge); Qwen3 ignored tools and hallucinated — avoid it.
 
 > ⚠️ The Circle Agent Stack runs on **Base mainnet** (real USDC, tiny amounts). Keep the budget
 > cap small (`BUDGET_USDC`). There is no testnet faucet path here; fund via `circle wallet fund`.
