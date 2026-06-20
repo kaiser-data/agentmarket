@@ -55,7 +55,7 @@ changes the wallet, the budget cap, or the blocklist logic.
 ```bash
 npm install --legacy-peer-deps    # openai@4 optionally peers zod@3; SDK needs zod@4 (harmless)
 # Circle Agent Stack setup:
-#   npm i -g @circle-fin/cli       # TODO(verify) exact package name
+#   npm i -g @circle-fin/cli       # requires Node 20.18.2+
 #   circle login                   # email + OTP (the agent can also do this inline)
 #   circle skill install
 #   circle wallet create --chain BASE && circle wallet fund ...   # fund a little USDC

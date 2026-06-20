@@ -68,7 +68,7 @@ if command -v circle >/dev/null 2>&1; then
   ok "circle CLI found ($(circle --version 2>/dev/null | head -1 || echo 'version unknown'))"
 else
   warn "circle CLI not found. Install it globally, then re-run this script:"
-  echo "      npm i -g @circle-fin/cli      # TODO(verify): confirm the package name"
+  echo "      npm i -g @circle-fin/cli      # requires Node 20.18.2+"
   echo "    (Circle Agent Stack docs: https://developers.circle.com/agent-stack)"
 fi
 
