@@ -1,128 +1,188 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 930" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
   <defs>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.12"/>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0e14"/>
+      <stop offset="1" stop-color="#0a0d12"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#161f2b" stroke-width="1" opacity="0.55"/>
+    </pattern>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9b949"/>
+      <stop offset="1" stop-color="#e5484d"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/>
-    </marker>
-    <marker id="arrowGreen" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#059669"/>
-    </marker>
-    <marker id="arrowViolet" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#7c3aed"/>
-    </marker>
+    <marker id="aGold" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#e9b949"/></marker>
+    <marker id="aGreen" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#3ddc84"/></marker>
+    <marker id="aRed" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#e5484d"/></marker>
+    <style>
+      .t   { fill:#e7ecf3; font-size:17px; font-weight:600; }
+      .s   { fill:#9bacc4; font-size:12.5px; }
+      .tag { fill:#5b6a7e; font-size:11px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .eye { fill:#7c8aa0; font-size:11px; letter-spacing:.16em; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .num { fill:#e9b949; font-size:11px; letter-spacing:.16em; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .arr { fill:#7c8aa0; font-size:10.5px; letter-spacing:.06em; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .chip{ font-size:11px; font-weight:600; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .gold{ fill:#e9b949; } .green{ fill:#3ddc84; } .red{ fill:#e5484d; } .muted{ fill:#7c8aa0; } .faint{ fill:#4a5666; }
+    </style>
   </defs>
 
-  <rect x="0" y="0" width="1240" height="930" rx="14" fill="#f8fafc"/>
+  <!-- canvas -->
+  <rect x="0" y="0" width="1280" height="800" rx="6" fill="url(#ink)"/>
+  <rect x="0" y="0" width="1280" height="800" fill="url(#grid)"/>
 
-  <!-- Title -->
-  <text x="620" y="44" text-anchor="middle" font-size="27" font-weight="700" fill="#0f172a">AgentMarket — Proof-of-Quality Architecture</text>
-  <text x="620" y="72" text-anchor="middle" font-size="14" fill="#64748b">The model proposes · the policy-bound signer decides · reputation is earned on-chain</text>
-
-  <!-- ================= UNTRUSTED ZONE ================= -->
-  <rect x="90" y="92" width="1060" height="208" rx="12" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="6 5"/>
-  <text x="108" y="116" font-size="12.5" font-weight="700" fill="#b91c1c" letter-spacing="0.5">① REASONING — UNTRUSTED · HOLDS NO KEY</text>
-
-  <!-- AI model card -->
-  <g filter="url(#shadow)">
-    <rect x="345" y="124" width="550" height="74" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="345" y="124" width="6" height="74" rx="3" fill="#6366f1"/>
+  <!-- header -->
+  <g transform="translate(48,30)">
+    <g transform="translate(0,2)" stroke="#e9b949" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 1v20M6 21h10M4 6h14M11 3 4 6l2.4 4.5a2.6 2.6 0 0 1-4.8 0zM11 3l7 3-2.4 4.5a2.6 2.6 0 0 0 4.8 0z"/>
+    </g>
+    <text x="30" y="13" fill="#e7ecf3" font-size="19" font-weight="700" letter-spacing=".02em">THEMIS</text>
+    <text x="108" y="13" class="muted" font-size="14">·  trust layer for agent commerce</text>
   </g>
-  <text x="620" y="154" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">AI Model · Nebius DeepSeek-V3.2 / Claude</text>
-  <text x="620" y="177" text-anchor="middle" font-size="12.5" fill="#64748b">reasons over tools · <tspan font-weight="700" fill="#b91c1c">PROPOSES</tspan> transactions · never holds a private key</text>
-
-  <!-- arrow AI -> policy -->
-  <line x1="620" y1="198" x2="620" y2="226" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <text x="632" y="218" font-size="11.5" fill="#475569">proposes intent</text>
-
-  <!-- SpendPolicy card -->
-  <g filter="url(#shadow)">
-    <rect x="345" y="228" width="550" height="60" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="345" y="228" width="6" height="60" rx="3" fill="#f59e0b"/>
+  <g transform="translate(1232,30)" text-anchor="end">
+    <text y="13" class="eye">BASE · ERC-8004 · CIRCLE x402</text>
   </g>
-  <text x="620" y="253" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">SpendPolicy · advisory pre-check (app layer)</text>
-  <text x="620" y="273" text-anchor="middle" font-size="12" fill="#64748b">budget cap · payee allowlist · reputation gate — fast feedback, but not trusted</text>
+  <line x1="48" y1="64" x2="1232" y2="64" stroke="#1f2a38"/>
 
-  <!-- ================= TRUST BOUNDARY ================= -->
-  <line x1="80" y1="324" x2="1160" y2="324" stroke="#dc2626" stroke-width="2" stroke-dasharray="9 6"/>
-  <rect x="430" y="311" width="380" height="26" rx="13" fill="#fee2e2" stroke="#dc2626" stroke-width="1.2"/>
-  <text x="620" y="328" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b91c1c">🔒 TRUST BOUNDARY — a prompt-injected model cannot cross</text>
+  <!-- (1) THE SPEND PATH -->
+  <text x="48" y="100" class="num">1 · THE SPEND PATH</text>
 
-  <!-- ================= TRUSTED ZONE ================= -->
-  <rect x="90" y="346" width="1060" height="476" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
-  <text x="108" y="370" font-size="12.5" font-weight="700" fill="#0f766e" letter-spacing="0.5">② EXECUTION — AUTHORITATIVE · KEY IN CIRCLE MPC</text>
-
-  <!-- Circle wallet hero card -->
-  <g filter="url(#shadow)">
-    <rect x="320" y="382" width="600" height="92" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <!-- A1 agent (untrusted) -->
+  <g transform="translate(48,116)">
+    <rect width="232" height="120" rx="4" fill="#10151d" stroke="#8a6f2c" stroke-width="1.3" stroke-dasharray="5 4"/>
+    <text x="18" y="30" class="eye gold">REASONING · UNTRUSTED</text>
+    <text x="18" y="58" class="t">AI Agent</text>
+    <text x="18" y="80" class="s">Nebius DeepSeek · Claude SDK</text>
+    <text x="18" y="104" class="tag">proposes a tx — holds no key</text>
   </g>
-  <text x="620" y="412" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">🔑 Circle Agent Wallet · MPC signer (authoritative)</text>
-  <text x="620" y="435" text-anchor="middle" font-size="12.5" fill="#1e40af">signs ONLY what passes the wallet's on-chain spending policy</text>
-  <text x="620" y="455" text-anchor="middle" font-size="12.5" fill="#1e40af">allowlist + per-tx / daily caps · set by the human via OTP · the agent can't change it</text>
 
-  <!-- split arrows to channels -->
-  <path d="M560 474 C 470 492, 420 490, 372 502" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <path d="M680 474 C 770 492, 820 490, 868 502" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <!-- TRUST BOUNDARY wall -->
+  <line x1="320" y1="92" x2="320" y2="660" stroke="url(#wall)" stroke-width="2" stroke-dasharray="2 6" filter="url(#glow)"/>
+  <text transform="rotate(-90 320 380)" x="320" y="376" text-anchor="middle" class="eye gold">TRUST BOUNDARY — a prompt-injected model cannot cross</text>
 
-  <!-- left channel: x402 -->
-  <g filter="url(#shadow)">
-    <rect x="200" y="504" width="324" height="58" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="200" y="504" width="6" height="58" rx="3" fill="#0ea5e9"/>
+  <!-- A2 wallet (authoritative) -->
+  <g transform="translate(360,116)">
+    <rect width="236" height="120" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <rect width="3" height="120" rx="2" fill="#e9b949"/>
+    <text x="18" y="30" class="eye gold">EXECUTION · AUTHORITATIVE</text>
+    <text x="18" y="58" class="t">Circle Agent Wallet</text>
+    <text x="18" y="80" class="s">MPC signer</text>
+    <text x="18" y="104" class="tag">signs behind policy · caps + allowlist (OTP)</text>
   </g>
-  <text x="362" y="529" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0f172a">x402 Nanopayment</text>
-  <text x="362" y="548" text-anchor="middle" font-size="11.5" fill="#64748b">circle services pay · gasless USDC (Base)</text>
 
-  <!-- right channel: wallet execute -->
-  <g filter="url(#shadow)">
-    <rect x="716" y="504" width="324" height="58" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="716" y="504" width="6" height="58" rx="3" fill="#7c3aed"/>
+  <!-- A3 x402 -->
+  <g transform="translate(656,116)">
+    <rect width="168" height="120" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <text x="16" y="30" class="eye">PAY</text>
+    <text x="16" y="58" class="t">x402</text>
+    <text x="16" y="80" class="s">gasless USDC</text>
+    <text x="16" y="104" class="tag">cents per call</text>
   </g>
-  <text x="878" y="529" text-anchor="middle" font-size="14.5" font-weight="700" fill="#0f172a">wallet execute</text>
-  <text x="878" y="548" text-anchor="middle" font-size="11.5" fill="#64748b">MPC signs ERC-8004 calldata</text>
 
-  <!-- arrows channel -> external -->
-  <line x1="362" y1="562" x2="362" y2="604" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="878" y1="562" x2="878" y2="604" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)"/>
-
-  <!-- left external: StableEnrich -->
-  <g filter="url(#shadow)">
-    <rect x="170" y="606" width="384" height="150" rx="11" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="170" y="606" width="6" height="150" rx="3" fill="#0ea5e9"/>
+  <!-- A4 service -->
+  <g transform="translate(884,116)">
+    <rect width="348" height="120" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <text x="18" y="30" class="eye">MARKETPLACE</text>
+    <text x="18" y="56" class="t">Paid service delivers data</text>
+    <g transform="translate(18,72)">
+      <rect width="84" height="22" rx="3" fill="#3ddc84" opacity="0.10" stroke="#1c6b40"/><text x="42" y="15" text-anchor="middle" class="chip green">Apollo</text>
+      <rect x="94" width="92" height="22" rx="3" fill="#3ddc84" opacity="0.10" stroke="#1c6b40"/><text x="140" y="15" text-anchor="middle" class="chip green">Minerva</text>
+      <rect x="196" width="76" height="22" rx="3" fill="#e5484d" opacity="0.10" stroke="#6e2528"/><text x="234" y="15" text-anchor="middle" class="chip red">Clado</text>
+    </g>
+    <text x="18" y="110" class="tag">Tavily discovers · agent buys per record</text>
   </g>
-  <text x="362" y="632" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">StableEnrich · real paid services</text>
-  <text x="362" y="657" text-anchor="middle" font-size="12" fill="#334155">Apollo People Search / Enrich</text>
-  <text x="362" y="678" text-anchor="middle" font-size="12" fill="#334155">Minerva Enrich · Clado Enrich  <tspan fill="#94a3b8">(competing)</tspan></text>
-  <text x="362" y="699" text-anchor="middle" font-size="12" fill="#334155">Hunter — <tspan font-weight="700">independent</tspan> email verify</text>
-  <rect x="232" y="714" width="260" height="26" rx="13" fill="#f0f9ff" stroke="#bae6fd"/>
-  <text x="362" y="731" text-anchor="middle" font-size="11" fill="#0369a1">real marketplace data · USDC-priced per call</text>
 
-  <!-- right external: ERC-8004 -->
-  <g filter="url(#shadow)">
-    <rect x="686" y="606" width="384" height="150" rx="11" fill="#ffffff" stroke="#e2e8f0"/>
-    <rect x="686" y="606" width="6" height="150" rx="3" fill="#7c3aed"/>
+  <!-- top arrows -->
+  <line x1="280" y1="176" x2="356" y2="176" stroke="#e9b949" stroke-width="1.6" marker-end="url(#aGold)"/>
+  <text x="318" y="168" text-anchor="middle" class="arr">propose</text>
+  <line x1="596" y1="176" x2="652" y2="176" stroke="#e9b949" stroke-width="1.6" marker-end="url(#aGold)"/>
+  <text x="624" y="168" text-anchor="middle" class="arr">sign + pay</text>
+  <line x1="824" y1="176" x2="880" y2="176" stroke="#e9b949" stroke-width="1.6" marker-end="url(#aGold)"/>
+  <text x="852" y="168" text-anchor="middle" class="arr">USDC</text>
+
+  <!-- (2) THE PROOF LOOP -->
+  <text x="884" y="276" class="num">2 · THE PROOF LOOP</text>
+
+  <!-- B1 verify -->
+  <g transform="translate(884,288)">
+    <rect width="348" height="96" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <rect width="3" height="96" rx="2" fill="#3ddc84"/>
+    <text x="18" y="28" class="eye green">INDEPENDENT VERIFICATION</text>
+    <text x="18" y="54" class="t">Hunter cross-checks the output</text>
+    <text x="18" y="78" class="tag">a second paid oracle — not self-report</text>
   </g>
-  <text x="878" y="632" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">ERC-8004 registries · Base</text>
-  <text x="878" y="657" text-anchor="middle" font-size="12" fill="#334155"><tspan font-weight="700">IdentityRegistry</tspan> — ERC-721 agent identity</text>
-  <text x="878" y="678" text-anchor="middle" font-size="12" fill="#334155"><tspan font-weight="700">ReputationRegistry</tspan> — payment-anchored</text>
-  <text x="878" y="699" text-anchor="middle" font-size="11" fill="#94a3b8" font-family="ui-monospace, monospace">0x8004A818…  /  0x8004B663…</text>
-  <rect x="748" y="714" width="260" height="26" rx="13" fill="#f5f3ff" stroke="#ddd6fe"/>
-  <text x="878" y="731" text-anchor="middle" font-size="11" fill="#6d28d9">reputation = ownable, transferable asset</text>
 
-  <!-- cross-verify + attest arrow (StableEnrich -> ERC-8004) -->
-  <line x1="554" y1="668" x2="686" y2="668" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#arrowViolet)"/>
-  <text x="620" y="654" text-anchor="middle" font-size="10.5" font-weight="700" fill="#6d28d9">attest</text>
-  <text x="620" y="690" text-anchor="middle" font-size="9.5" fill="#7c3aed">pay+verify+outcome</text>
-
-  <!-- reputation feedback loop: keyless public read back to the policy gate -->
-  <path d="M1070 648 H 1118 V 256 H 897" fill="none" stroke="#059669" stroke-width="1.8" stroke-dasharray="7 4" marker-end="url(#arrowGreen)"/>
-  <text x="1128" y="450" font-size="11.5" font-weight="700" fill="#047857" transform="rotate(90 1128 450)">query reputation BEFORE paying · keyless public read</text>
-
-  <!-- ================= NETWORK EFFECT ================= -->
-  <g filter="url(#shadow)">
-    <rect x="90" y="840" width="1060" height="74" rx="12" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <!-- B2 erc8004 -->
+  <g transform="translate(884,418)">
+    <rect width="348" height="136" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <rect width="3" height="136" rx="2" fill="#3ddc84"/>
+    <text x="18" y="28" class="eye green">ON-CHAIN · BASE</text>
+    <text x="18" y="54" class="t">ERC-8004 registries</text>
+    <text x="18" y="76" class="s">Identity (ERC-721) + Reputation</text>
+    <text x="18" y="104" class="tag" fill="#3ddc84">attestation =</text>
+    <text x="18" y="122" class="tag">payTx + verifyTx + outcome → feedbackHash</text>
   </g>
-  <text x="116" y="868" font-size="14" font-weight="700" fill="#065f46">⚡ NETWORK EFFECT</text>
-  <text x="116" y="890" font-size="12.5" fill="#047857">Agent A pays + cross-verifies + attests on-chain  →  Agent B reads the reputation, pays <tspan font-weight="700">$0</tspan> to learn, and routes around the proven-bad service it never touched.</text>
-  <text x="116" y="908" font-size="12.5" font-style="italic" fill="#059669">One agent's paid lesson becomes a public good — that is the infrastructure.</text>
+
+  <!-- proof arrows -->
+  <line x1="1058" y1="236" x2="1058" y2="284" stroke="#e9b949" stroke-width="1.6" marker-end="url(#aGold)"/>
+  <text x="1090" y="266" class="arr">deliver</text>
+  <line x1="1058" y1="384" x2="1058" y2="414" stroke="#3ddc84" stroke-width="1.6" marker-end="url(#aGreen)"/>
+  <text x="1090" y="404" class="arr" fill="#3ddc84">attest</text>
+
+  <!-- (3) THE TRUST FEEDBACK -->
+  <text x="48" y="556" class="num">3 · TRUST FEEDBACK · KEYLESS READ</text>
+
+  <!-- C1 THEMIS engine -->
+  <g transform="translate(470,572)">
+    <rect width="372" height="150" rx="4" fill="#121821" stroke="#2a3647"/>
+    <rect width="3" height="150" rx="2" fill="#e9b949"/>
+    <text x="18" y="30" class="eye gold">THEMIS TRUST ENGINE</text>
+    <text x="18" y="56" class="t">Two scores fakes can't pass</text>
+    <g transform="translate(18,72)">
+      <rect width="166" height="54" rx="3" fill="#3ddc84" opacity="0.07" stroke="#1c6b40"/>
+      <text x="14" y="22" class="chip green">QUALITY SCORE</text>
+      <text x="14" y="42" class="s" font-size="11">verified pass rate</text>
+      <rect x="178" width="158" height="54" rx="3" fill="#e5484d" opacity="0.07" stroke="#6e2528"/>
+      <text x="192" y="22" class="chip red">WASH RISK</text>
+      <text x="192" y="42" class="s" font-size="11">manufactured?</text>
+    </g>
+    <text x="18" y="142" class="tag">reads getSummary / getClients — no key, no signer</text>
+  </g>
+
+  <!-- C2 policy gate -->
+  <g transform="translate(48,572)">
+    <rect width="372" height="150" rx="4" fill="#121821" stroke="#1f2a38"/>
+    <rect width="3" height="150" rx="2" fill="#3ddc84"/>
+    <text x="18" y="30" class="eye green">WALLET POLICY GATE</text>
+    <text x="18" y="56" class="t">Verdict → decision, before spend</text>
+    <g transform="translate(18,72)">
+      <rect width="74" height="24" rx="3" fill="#3ddc84" opacity="0.12" stroke="#1c6b40"/><text x="37" y="16" text-anchor="middle" class="chip green">PAY</text>
+      <rect x="84" width="84" height="24" rx="3" fill="#e9b949" opacity="0.12" stroke="#8a6f2c"/><text x="126" y="16" text-anchor="middle" class="chip gold">TRIAL</text>
+      <rect x="178" width="96" height="24" rx="3" fill="#e5484d" opacity="0.12" stroke="#6e2528"/><text x="226" y="16" text-anchor="middle" class="chip red">REFUSE</text>
+    </g>
+    <text x="18" y="124" class="s" font-size="11.5">Trusted · Unproven · Suspicious · Unreliable</text>
+    <text x="18" y="142" class="tag">exports an enforceable JSON policy</text>
+  </g>
+
+  <!-- feedback arrows -->
+  <line x1="884" y1="640" x2="846" y2="640" stroke="#3ddc84" stroke-width="1.6" marker-end="url(#aGreen)"/>
+  <text x="865" y="632" text-anchor="middle" class="arr" fill="#3ddc84">read</text>
+  <line x1="470" y1="640" x2="424" y2="640" stroke="#3ddc84" stroke-width="1.6" marker-end="url(#aGreen)"/>
+  <text x="447" y="632" text-anchor="middle" class="arr" fill="#3ddc84">verdict</text>
+  <!-- ERC-8004 down into engine -->
+  <path d="M1058 554 V640 H846" fill="none" stroke="#3ddc84" stroke-width="1.6" marker-end="url(#aGreen)"/>
+
+  <!-- loop back: policy -> wallet (refuse before spend) -->
+  <path d="M234 572 V440 H300 Q322 440 322 418 V300 Q322 280 344 280 H360 V240" fill="none" stroke="#3ddc84" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#aGreen)" opacity="0.9"/>
+  <text x="250" y="428" class="arr" fill="#3ddc84">refuse proven-bad</text>
+  <text x="250" y="444" class="arr" fill="#3ddc84">before a cent moves</text>
+
+  <!-- footer: network effect -->
+  <g transform="translate(48,750)">
+    <text class="eye gold">NETWORK EFFECT</text>
+    <text x="132" class="s" font-size="12.5">Agent A pays <tspan class="gold" font-weight="600">~$0.67</tspan> to learn a service is bad → attests on-chain. Agent B reads it for <tspan class="green" font-weight="600">$0</tspan> and never touches it — one paid lesson becomes a public good.</text>
+  </g>
 </svg>

@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* ── The Proof Terminal — design tokens ───────────────────────────────
+   Ink graphite base · mint-gold signature (reputation is *minted*) ·
+   an honest pass/fail axis that lives in the real on-chain data.       */
+@theme {
+  --color-ink: #0a0d12; /* page — cool graphite-black, not pure black */
+  --color-panel: #121821; /* raised data surfaces */
+  --color-panel-2: #0e141c; /* recessed wells */
+  --color-hairline: #1f2a38; /* 1px rules / grid */
+  --color-hairline-soft: #161f2b;
+  --color-text: #e7ecf3; /* primary */
+  --color-muted: #7c8aa0; /* labels, addresses */
+  --color-faint: #4a5666; /* tertiary */
+
+  --color-gold: #e9b949; /* SIGNATURE — seals, brand, "minted" */
+  --color-gold-dim: #8a6f2c;
+  --color-verified: #3ddc84; /* attestation pass / score good */
+  --color-verified-dim: #1c6b40;
+  --color-failed: #e5484d; /* attestation fail / proven unreliable */
+  --color-failed-dim: #6e2528;
+
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+
+  --radius: 2px; /* terminal, not bubbly */
+}
+
+html {
+  background: var(--color-ink);
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ambient: a faint ledger grid, masked to a horizon glow behind the hero. */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--color-hairline-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-hairline-soft) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    #000 0%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
+}
+
+/* ── Display: Archivo, driven wide via the wdth axis ── */
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 125%; /* expanded — the monumental, "stamped" look */
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Eyebrow / data labels — small, tracked-out, monospaced */
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline-framed data panel */
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius);
+}
+
+/* Links to on-chain proof get the verify treatment */
+.proof-link {
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.proof-link:hover {
+  color: var(--color-gold);
+}
+
+/* Honor reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Keyboard focus is always visible */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.live-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "service": "apollo-people-search",
+    "amountUsdc": 0.02,
+    "txHash": "0x5151000051510000515100005151000051510000515100005151000051510000",
+    "ts": 1781945204950,
+    "reason": "discover prospects for \"Series A fintech CTOs in Europe, 3 leads\"",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5152000051520000515200005152000051520000515200005152000051520000",
+    "ts": 1781945207058,
+    "reason": "verify email for Lena Fischer",
+    "ok": true
+  },
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5153000051530000515300005153000051530000515300005153000051530000",
+    "ts": 1781945209363,
+    "reason": "enrich Tomás Oliveira",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5154000051540000515400005154000051540000515400005154000051540000",
+    "ts": 1781945209371,
+    "reason": "verify email for Tomás Oliveira",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5155000051550000515500005155000051550000515500005155000051550000",
+    "ts": 1781945212037,
+    "reason": "verify email for Sofia Rossi",
+    "ok": true
+  },
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5156000051560000515600005156000051560000515600005156000051560000",
+    "ts": 1781945214905,
+    "reason": "enrich Jonas Berg",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5157000051570000515700005157000051570000515700005157000051570000",
+    "ts": 1781945214913,
+    "reason": "verify email for Jonas Berg",
+    "ok": true
+  }
+]

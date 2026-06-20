@@ -1,0 +1,146 @@
+[
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5151000051510000515100005151000051510000515100005151000051510000",
+    "ts": 1781950842870,
+    "reason": "enrich Lena Fischer via apollo-people-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5152000051520000515200005152000051520000515200005152000051520000",
+    "ts": 1781950842923,
+    "reason": "verify Lena Fischer's email",
+    "ok": true
+  },
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5153000051530000515300005153000051530000515300005153000051530000",
+    "ts": 1781950870856,
+    "reason": "enrich Sofia Rossi via apollo-people-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5154000051540000515400005154000051540000515400005154000051540000",
+    "ts": 1781950870859,
+    "reason": "verify Sofia Rossi's email",
+    "ok": true
+  },
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5155000051550000515500005155000051550000515500005155000051550000",
+    "ts": 1781950899683,
+    "reason": "enrich Jonas Berg via apollo-people-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5156000051560000515600005156000051560000515600005156000051560000",
+    "ts": 1781950899689,
+    "reason": "verify Jonas Berg's email",
+    "ok": true
+  },
+  {
+    "service": "minerva-enrich",
+    "amountUsdc": 0.045,
+    "txHash": "0x5157000051570000515700005157000051570000515700005157000051570000",
+    "ts": 1781950927352,
+    "reason": "enrich Lena Fischer via minerva-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5158000051580000515800005158000051580000515800005158000051580000",
+    "ts": 1781950927356,
+    "reason": "verify Lena Fischer's email",
+    "ok": true
+  },
+  {
+    "service": "minerva-enrich",
+    "amountUsdc": 0.045,
+    "txHash": "0x5159000051590000515900005159000051590000515900005159000051590000",
+    "ts": 1781950941979,
+    "reason": "enrich Sofia Rossi via minerva-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5151000051510000515100005151000051510000515100005151000051510000",
+    "ts": 1781950941982,
+    "reason": "verify Sofia Rossi's email",
+    "ok": true
+  },
+  {
+    "service": "minerva-enrich",
+    "amountUsdc": 0.045,
+    "txHash": "0x5151100051511000515110005151100051511000515110005151100051511000",
+    "ts": 1781950969965,
+    "reason": "enrich Jonas Berg via minerva-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5151200051512000515120005151200051512000515120005151200051512000",
+    "ts": 1781950969967,
+    "reason": "verify Jonas Berg's email",
+    "ok": true
+  },
+  {
+    "service": "clado-contacts-enrich",
+    "amountUsdc": 0.04,
+    "txHash": "0x5151300051513000515130005151300051513000515130005151300051513000",
+    "ts": 1781951022383,
+    "reason": "enrich Lena Fischer via clado-contacts-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5151400051514000515140005151400051514000515140005151400051514000",
+    "ts": 1781951022385,
+    "reason": "verify Lena Fischer's email",
+    "ok": true
+  },
+  {
+    "service": "clado-contacts-enrich",
+    "amountUsdc": 0.04,
+    "txHash": "0x5151500051515000515150005151500051515000515150005151500051515000",
+    "ts": 1781951049603,
+    "reason": "enrich Sofia Rossi via clado-contacts-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5151600051516000515160005151600051516000515160005151600051516000",
+    "ts": 1781951049605,
+    "reason": "verify Sofia Rossi's email",
+    "ok": true
+  },
+  {
+    "service": "clado-contacts-enrich",
+    "amountUsdc": 0.04,
+    "txHash": "0x5151700051517000515170005151700051517000515170005151700051517000",
+    "ts": 1781951058691,
+    "reason": "enrich Jonas Berg via clado-contacts-enrich",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5151800051518000515180005151800051518000515180005151800051518000",
+    "ts": 1781951058695,
+    "reason": "verify Jonas Berg's email",
+    "ok": true
+  }
+]

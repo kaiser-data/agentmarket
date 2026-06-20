@@ -7,3 +7,12 @@ dist/
 ledger.json
 ledger-*.json
 reputation-store.json
+
+# Local Netlify folder
+.netlify
+
+# The frontend bundles a snapshot of the on-chain receipts — these MUST be
+# tracked (overrides the global ledger/reputation ignores above).
+!web/data/reputation-store.json
+!web/data/ledger.json
+!web/data/ledger-*.json

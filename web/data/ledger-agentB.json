@@ -1,0 +1,34 @@
+[
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5151900051519000515190005151900051519000515190005151900051519000",
+    "ts": 1781951088833,
+    "reason": "enrich Lena Fischer via apollo-people-enrich (reputation-routed)",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5152000051520000515200005152000051520000515200005152000051520000",
+    "ts": 1781951088838,
+    "reason": "verify Lena Fischer's email",
+    "ok": true
+  },
+  {
+    "service": "apollo-people-enrich",
+    "amountUsdc": 0.0495,
+    "txHash": "0x5152100051521000515210005152100051521000515210005152100051521000",
+    "ts": 1781951091166,
+    "reason": "enrich Sofia Rossi via apollo-people-enrich (reputation-routed)",
+    "ok": true
+  },
+  {
+    "service": "hunter-email-verifier",
+    "amountUsdc": 0.03,
+    "txHash": "0x5152200051522000515220005152200051522000515220005152200051522000",
+    "ts": 1781951091170,
+    "reason": "verify Sofia Rossi's email",
+    "ok": true
+  }
+]
