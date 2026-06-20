@@ -37,7 +37,7 @@ const BOUNTIES = [
     tag: "Bonus",
     sponsor: "Blockchain for Good",
     prize: "$500 · social impact",
-    fit: "A trillion-dollar agent economy needs fraud resistance to be safe. Themis makes reputation Sybil-resistant by construction — no payment + independent verification, no score — protecting buyers from wash-traded trust.",
+    fit: "A trillion-dollar agent economy needs fraud resistance to be safe. Themis makes reputation Sybil-resistant by requiring paid interactions, independent verification, and wash-risk analysis — protecting buyers from wash-traded trust.",
     tone: "risk",
   },
 ];
@@ -50,22 +50,28 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-12">
       <p className="label">About · {BRAND.name}</p>
-      <h1 className="font-display mt-3 text-3xl sm:text-5xl">{BRAND.tagline}</h1>
+      <h1 className="font-display mt-3 text-3xl sm:text-5xl">A trust &amp; policy layer for autonomous agent commerce.</h1>
+      <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted">
+        Before an agent pays an unknown service, Themis tells the wallet whether to{" "}
+        <span className="text-verified">pay</span>, <span className="text-gold">trial</span>, or{" "}
+        <span className="text-failed">refuse</span> — and why.
+      </p>
 
-      {/* Thesis — the defensible positioning */}
+      {/* Thesis — the four-part chain, hard to attack */}
       <div className="panel mt-8 p-6">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Pillar n="Payment" t="proves it happened" d="A real USDC nanopayment settles on-chain. The interaction is not hypothetical." />
           <Pillar n="Verification" t="proves it was good" d="A second, independent agent checks the output. Cross-verification, not self-report." />
-          <Pillar n="Reputation" t="binds both" d="Only a paid + verified interaction can mint an ERC-8004 attestation. Faking it costs real money and still fails verification." />
+          <Pillar n="Wash-risk" t="asks if it was earned" d="Circular payments, exclusive verifiers, and thin buyer diversity flag reputation that was manufactured." />
+          <Pillar n="Policy" t="decides the spend" d="The verdict becomes an enforceable rule: pay, trial, or refuse — before a cent moves." />
         </div>
         <p className="mt-5 border-t border-hairline pt-4 text-[14px] leading-relaxed text-muted">
-          We never claim &ldquo;payment proves quality&rdquo; — that&apos;s attackable. We separate
-          the two and add a <span className="text-text">wash-risk</span> score, so a service that
-          pays to manufacture its own reputation is flagged <span className="text-failed">Suspicious</span>,
-          not <span className="text-verified">Trusted</span>. Then the{" "}
-          <Link href="/policy" className="text-gold hover:underline">policy engine</Link> turns that
-          judgment into a spend decision your wallet can enforce.
+          We never claim &ldquo;payment proves quality&rdquo; — that&apos;s attackable.{" "}
+          <span className="text-text">Payment proves the interaction happened. Verification proves
+          whether it was good. Wash-risk analysis asks whether the reputation was honestly earned.
+          The wallet policy decides whether to spend.</span> That makes reputation Sybil-resistant by
+          requiring paid interactions, independent verification, and wash-risk analysis — not by
+          assertion.
         </p>
       </div>
 

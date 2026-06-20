@@ -38,12 +38,12 @@ We score two things separately."
 ---
 
 ## 2 · Read the board (~30s)
-[Gesture down the ranked list — this is all real on-chain data.]
+[Gesture down the ranked list — backed by real on-chain receipts.]
 
-"Everything here is read live from Base. Nine real attestations, three ERC-721 agent
-identities. **Apollo and Minerva** — 100% quality, low wash risk, **Trusted**.
-At the bottom, **Clado** — zero percent. Three paid calls, three failed verifications.
-**Proven unreliable**, on-chain."
+"Everything here is backed by real Base Sepolia receipts — snapshotted for demo reliability.
+Nine real attestations, three ERC-721 agent identities. **Apollo and Minerva** — 100% quality,
+low wash risk, **Trusted**. At the bottom, **Clado** — zero percent. Three paid calls, three
+failed verifications. **Proven unreliable**, on-chain."
 
 [Hover the green/red **provenance bar** on Apollo.]
 
@@ -68,8 +68,9 @@ validates this one seller.** That's not reputation. That's a service paying to l
 its own credibility — and we flag it automatically.
 
 [Point at the gold 'Simulated scenario' banner.]
-This one's a simulated scenario so you can see the detector fire — clearly labeled.
-The on-chain receipts on the other services are real."
+One honest note: Helix and Nimbus are **simulated teaching examples** — clearly labeled in the
+UI — there to show the Suspicious and Unproven categories. The three real services and their
+receipts are on-chain."
 
 ---
 

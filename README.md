@@ -15,7 +15,8 @@ problem nobody solved: **how does an agent know which service to trust _before_ 
 
 Star ratings are free to fake. THEMIS makes a score that isn't: **no payment + independent
 verification, no reputation.** Every score is minted from a real USDC call that a second agent
-cross-verified, then written to **ERC-8004 on Base** — Sybil-resistant by construction.
+cross-verified, then written to **ERC-8004 on Base** — Sybil-resistant by requiring paid
+interactions, independent verification, and wash-risk analysis.
 
 > **Reviews are claims.** THEMIS requires a paid interaction, independent verification, and an
 > on-chain attestation before reputation moves.
@@ -24,7 +25,7 @@ cross-verified, then written to **ERC-8004 on Base** — Sybil-resistant by cons
 
 ## Architecture
 
-![THEMIS architecture — the trust loop](docs/architecture.svg)
+![THEMIS architecture — the trust loop](docs/architecture.png)
 
 The whole system is one **clockwise loop**:
 
@@ -129,7 +130,7 @@ agents/     network-demo (two agents + on-chain reputation) · leadgen-core (sha
             leadgen-agent-nebius (default) · leadgen-agent (Claude SDK) · consumer (deterministic)
 scripts/    register-services (mint ERC-721 identities) · spike-payment
 vendor/     official Circle kits + real ERC-8004 ABIs
-docs/       architecture.svg
+docs/       architecture.png (+ architecture.html source)
 ```
 
 See **[PITCH_LIVE_DEMO.md](./PITCH_LIVE_DEMO.md)** for the demo script, **[HANDOFF.md](./HANDOFF.md)**
