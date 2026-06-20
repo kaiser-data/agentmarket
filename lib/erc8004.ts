@@ -82,9 +82,15 @@ export async function agentIdFromTx(txHash: `0x${string}`): Promise<bigint> {
 
 // ---- READ (keyless public RPC) ----
 export async function getSummary(agentId: bigint): Promise<{ count: number; score: number }> {
+  // getSummary requires the client list (it reverts on []), so fetch it first.
+  const clients = (await pub.readContract({
+    address: REPUTATION, abi: REP_ABI as any, functionName: "getClients", args: [agentId],
+  })) as `0x${string}`[];
+  if (!clients.length) return { count: 0, score: 0.5 };
   const [count, value, decimals] = (await pub.readContract({
-    address: REPUTATION, abi: REP_ABI as any, functionName: "getSummary", args: [agentId, [], TAG1, ""],
+    address: REPUTATION, abi: REP_ABI as any, functionName: "getSummary", args: [agentId, clients, TAG1, ""],
   })) as [bigint, bigint, number];
   const n = Number(count);
+  // summaryValue is the aggregate of feedback values (0 or 100 here); normalise to 0..1.
   return { count: n, score: n === 0 ? 0.5 : Number(value) / 10 ** Number(decimals) / 100 };
 }
