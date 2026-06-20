@@ -79,7 +79,7 @@ if command -v circle >/dev/null 2>&1; then
     ok "a Circle session exists (the agent will reuse it)"
   else
     warn "no valid Circle session. Log in (email + OTP) before running the agent:"
-    echo "      circle login"
+    echo "      circle wallet login YOUR_EMAIL --type agent --init   # then: circle wallet login --request <id> --otp <code>"
   fi
   step "Circle agent skill"
   echo "    Install the agent skill once (no-op if already installed):"
@@ -94,7 +94,7 @@ if command -v circle >/dev/null 2>&1; then
       warn "Fund it with a little USDC (real money — Base mainnet), e.g.:"
       echo "      circle wallet fund --address <ADDR> --chain BASE --amount 2 --token usdc --method fiat"
     else
-      warn "log in first (circle login), then re-run: ./setup.sh --wallet"
+      warn "log in first (circle wallet login ...), then re-run: ./setup.sh --wallet"
     fi
   fi
 fi

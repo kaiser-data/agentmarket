@@ -56,7 +56,7 @@ changes the wallet, the budget cap, or the blocklist logic.
 npm install --legacy-peer-deps    # openai@4 optionally peers zod@3; SDK needs zod@4 (harmless)
 # Circle Agent Stack setup:
 #   npm i -g @circle-fin/cli       # requires Node 20.18.2+
-#   circle login                   # email + OTP (the agent can also do this inline)
+#   circle wallet login <email> --type agent --init   # email+OTP (npm run agent also does this inline)
 #   circle skill install
 #   circle wallet create --chain BASE && circle wallet fund ...   # fund a little USDC
 cp .env.example .env               # add ANTHROPIC_API_KEY, TAVILY_API_KEY, (NEBIUS_API_KEY)

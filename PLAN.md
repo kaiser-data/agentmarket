@@ -28,12 +28,12 @@ Tavily (discovery) + Nebius (qualify/validate) + Blockchain-for-Good (grant-find
 - **circle-tools commands** (we wrap these in `lib/circle-cli.ts`):
   `wallet create|list|balance`, `services search|inspect|pay` — all `--output json`.
 - **Chain:** BASE. **Nanopayments:** gasless, x402 over Circle Gateway, batched settlement.
-- **Skills/CLI:** `circle login`, `circle skill install`, global Circle CLI.
+- **Skills/CLI:** `circle wallet login`, `circle skill install`, global Circle CLI.
 
 ---
 
 ## Task 0 — Setup & go/no-go (FIRST, ~60 min)
-- [ ] Install Circle CLI globally; `circle login`; `circle skill install`. **TODO(verify) package name.**
+- [ ] Install Circle CLI globally (`npm i -g @circle-fin/cli`); `circle wallet login`; `circle skill install`.
 - [ ] Keys: `ANTHROPIC_API_KEY`, `TAVILY_API_KEY`, optional `NEBIUS_API_KEY` ($100 credits).
 - [ ] `circle wallet create --type agent --chain BASE`; **fund its Gateway USDC balance**.
 - [ ] **CP0 MONEY SPIKE (GO/NO-GO):** `npm run services` then `npm run spike` →
