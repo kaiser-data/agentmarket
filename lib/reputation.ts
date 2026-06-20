@@ -6,22 +6,26 @@
 // ReputationRegistry. You cannot fake a good score without spending real USDC and
 // passing an independent oracle — Sybil-resistant by construction.
 //
-// Two modes (mirrors lib/rail.ts):
-//   SIMULATE=1 → a file-backed shared registry (reputation-store.json) that stands
-//                in for the chain, with simulated Base Sepolia explorer links. Lets
-//                the two-agent network-effect demo run free and cross-process.
-//   SIMULATE=0 → real ERC-8004 ReputationRegistry on Base Sepolia (free testnet gas).
+// This layer is DECOUPLED from payments (lib/rail.ts SIMULATE) on purpose:
+//   ONCHAIN_REPUTATION=1 → real ERC-8004 ReputationRegistry on Base Sepolia (free
+//                          testnet gas). Works even with SIMULATE=1 payments, so you
+//                          get REAL, clickable attestation tx links for $0 — the
+//                          payments are mocked (Base mainnet only), the on-chain
+//                          reputation is real. Disclose the mock payTx in the pitch.
+//   else                 → file-backed shared registry (reputation-store.json) with
+//                          simulated explorer links — fully free, cross-process.
 //
-// The shared store is what makes the demo's point: Agent A writes attestations,
-// Agent B (a separate process) reads them and routes around a proven-bad service
-// it never touched.
+// The shared store / on-chain registry is what makes the demo's point: Agent A
+// writes attestations, Agent B (a separate process) reads them and routes around a
+// proven-bad service it never touched.
 
 import "dotenv/config";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { SIMULATE } from "./rail.ts";
 import * as erc8004 from "./erc8004.ts";
 import { executeViaCircle } from "./circle-execute.ts";
 
+/** Real on-chain reputation (Base Sepolia) when set; otherwise the free file store. */
+const ONCHAIN = process.env.ONCHAIN_REPUTATION === "1";
 const STORE = process.env.REPUTATION_STORE ?? "reputation-store.json";
 const AGENT_MAP = process.env.ERC8004_AGENT_MAP ?? "erc8004-agents.json";
 
@@ -45,8 +49,8 @@ export const ERC8004 = {
 export function identityTokenLink(serviceId: string): string | undefined {
   try {
     if (!existsSync(AGENT_MAP)) {
-      // In sim we mint deterministic ids so the token link is still demonstrable.
-      if (SIMULATE) return erc8004.identityToken(simAgentId(serviceId));
+      // No real registration yet: only fabricate a token link in the pure-mock mode.
+      if (!ONCHAIN) return erc8004.identityToken(simAgentId(serviceId));
       return undefined;
     }
     const map = JSON.parse(readFileSync(AGENT_MAP, "utf8")) as Record<string, string>;
@@ -92,31 +96,27 @@ export function reset() { save([]); }
  */
 export async function attest(a: Omit<Attestation, "ts" | "onchainTx" | "explorer">): Promise<Attestation> {
   const row: Attestation = { ...a, ts: Date.now() };
-  if (SIMULATE) {
-    row.onchainTx = simAttestTx();
-    row.explorer = ERC8004.explorerTx(row.onchainTx);
-    const rows = load(); rows.push(row); save(rows);
-  } else {
-    // Real path: ERC-8004 ReputationRegistry.giveFeedback on Base Sepolia.
-    // feedbackHash commits to { payTx, verifyTx, outcome } so the score is auditable.
-    // TODO(wire): viem writeContract giveFeedback(agentId, value, valueDecimals, tag1, tag2, feedbackURI, feedbackHash)
+  if (ONCHAIN) {
+    // Real ERC-8004 ReputationRegistry.giveFeedback on Base Sepolia. feedbackHash
+    // commits to { payTx, verifyTx, outcome }, so the score is auditable on-chain.
     const { onchainTx } = await writeFeedbackOnchain(row);
     row.onchainTx = onchainTx;
     row.explorer = ERC8004.explorerTx(onchainTx);
+  } else {
+    row.onchainTx = simAttestTx();
+    row.explorer = ERC8004.explorerTx(row.onchainTx);
+    const rows = load(); rows.push(row); save(rows);
   }
   return row;
 }
 
 /** Read a service's aggregate reputation from the shared registry. */
 export async function getReputation(serviceId: string): Promise<{ count: number; score: number; fails: number }> {
-  if (SIMULATE) {
-    const rows = load().filter((r) => r.serviceId === serviceId);
-    if (!rows.length) return { count: 0, score: 0.5, fails: 0 };
-    const score = rows.reduce((s, r) => s + r.scorePct / 100, 0) / rows.length;
-    return { count: rows.length, score, fails: rows.filter((r) => r.outcome === "fail").length };
-  }
-  // Real path: ERC-8004 getSummary(agentId, ...) → (count, summaryValue, decimals).
-  return readSummaryOnchain(serviceId);
+  if (ONCHAIN) return readSummaryOnchain(serviceId); // ERC-8004 getSummary on Base Sepolia
+  const rows = load().filter((r) => r.serviceId === serviceId);
+  if (!rows.length) return { count: 0, score: 0.5, fails: 0 };
+  const score = rows.reduce((s, r) => s + r.scorePct / 100, 0) / rows.length;
+  return { count: rows.length, score, fails: rows.filter((r) => r.outcome === "fail").length };
 }
 
 /**

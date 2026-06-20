@@ -50,7 +50,10 @@ async function pay(policy: SpendPolicy, ledger: Ledger, svcId: string, data: Rec
 function bar(label: string) { console.log(`\n${"─".repeat(64)}\n  ${label}\n${"─".repeat(64)}`); }
 
 async function main() {
-  reset(); // fresh shared registry for the demo
+  const onchain = process.env.ONCHAIN_REPUTATION === "1";
+  const simPay = process.env.SIMULATE === "1";
+  console.log(`\n  mode: payments=${simPay ? "SIMULATED (free)" : "REAL Base mainnet USDC"} · reputation=${onchain ? "REAL ERC-8004 (Base Sepolia)" : "simulated store"}\n`);
+  if (!onchain) reset(); // fresh shared file registry for the mock demo
   const wallets = await rail.listWallets().catch(() => []);
   WALLET = (wallets[0] ?? (await rail.createWallet())).address;
 
