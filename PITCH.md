@@ -7,12 +7,13 @@
 
 ## The 30-second hook (say this first)
 > "AI agents can think, but they can't *buy*. The moment an agent needs data it has no
-> subscription for, it hits a wall — no card, no account, no way to pay a stranger.
-> AgentMarket gives an agent a Circle Agent Wallet as its identity **and** its budget, and
-> sends it to do a real job: build a list of sales leads. It discovers paid data services,
-> pays per record in USDC, and — the part we're proud of — when a service sells it garbage,
-> it **blocklists that service in its own wallet policy** and stops paying. A self-defending
-> spend agent. Let me show you."
+> subscription for, it hits a wall — no card, no account, no way to pay per use. AgentMarket
+> gives an agent a Circle Agent Wallet as its identity **and** its budget, and sends it to do
+> a real job: build a list of qualified sales leads. On its own, it discovers real paid data
+> services on the Circle Marketplace, **pays Apollo to find prospects, pays to enrich them,
+> and pays Hunter to verify the emails** so it never keeps bad data — all under a hard budget
+> cap, returning an itemized on-chain receipt for every cent. Real USDC, real services, no
+> human in the billing loop. Let me show you."
 
 ---
 
@@ -21,17 +22,18 @@ Run `npm run dashboard` (projector) + `npm run agent "Series A fintech CTOs in E
 
 | # | What you show | What you say | Judging criterion it hits |
 |---|---|---|---|
-| 1 | Wallet address + budget cap on screen | "This is the agent's Circle Agent Wallet on Base. Its whole operating budget is $X — a hard cap." | **Wallet integration** |
-| 2 | `tavily_discover` fills candidate list | "It uses Tavily to find companies matching the brief." | Agentic usefulness (Tavily) |
-| 3 | `circle_search_services` + inspect | "It discovers paid enrichment services on the Circle Marketplace and inspects their price + schema before spending a cent." | Agentic usefulness |
-| 4 | **USDC payment line + tx, budget bar moves** | "Real USDC nanopayment — gasless, settled on Base. Every line says *what* it bought and *why*." | **Payment design** (the Circle moment) |
-| 5 | Lead row turns green, ledger grows | "Nebius scores the lead against the brief; good ones go in the list." | Agentic usefulness (Nebius) |
-| 6 | **Rogue underbids, wins, returns bad data → row goes red** | "This cheap service just sold a fabricated contact. Validation caught it." | Originality |
-| 7 | **Service blocklisted; next round skips it** | "The agent wrote that service out of its wallet policy. It will never pay it again — watch it route the next buy to an honest provider." | **Originality + policy-based payment behavior** |
-| 8 | Final: N leads + itemized receipt ledger, total < cap | "8 qualified leads, $1.85 total, every payment receipted on-chain — and it stayed under budget." | **UX + technical execution** |
+| 1 | Wallet address + budget cap on screen | "This is the agent's Circle Agent Wallet on Base. Its whole operating budget is $X — a hard cap it cannot exceed." | **Wallet integration** |
+| 2 | `circle_search_services` results | "On its own it discovers real paid data services on the Circle Marketplace — here's StableEnrich's Apollo + Hunter endpoints." | Agentic usefulness |
+| 3 | inspect shows price + schema | "It inspects price and the input schema before spending a cent — $0.02 to search, $0.05 to enrich, $0.03 to verify." | Payment design |
+| 4 | **USDC payment line + tx, budget bar moves** | "Real USDC nanopayment, gasless on Base. It just paid Apollo to find CTOs at European fintechs. Every line says what it bought and why." | **Payment design** (the Circle moment) |
+| 5 | Leads stream in, Nebius scores them | "Nebius scores each prospect against the brief — free reasoning, paid only for data." | Agentic usefulness (Nebius) |
+| 6 | **Pays Hunter to verify an email → row turns green/red** | "It spends $0.03 to *verify* a lead's email before trusting it. Unverifiable ones are dropped — it won't pay to keep bad data." | **Originality** (pays for its own QA) |
+| 7 | Budget bar near cap → agent stops | "Watch — it's near the cap, so it stops buying. The wallet policy is a hard ceiling, not a suggestion." | **Policy-based payment behavior** |
+| 8 | Final: N verified leads + itemized receipt ledger, total < cap | "7 qualified, email-verified leads. $0.61 total, every payment receipted on-chain, under budget." | **UX + technical execution** |
 
-**The one moment that wins:** beats 6–7. Most teams demo a happy-path payment. We demo a wallet
-that *defends its own budget against a scammer, live*.
+**The one moment that wins:** beat 6. Most teams demo an agent that *spends*. We demo an agent
+that spends to **verify its own work** and refuses to keep data it paid for but can't trust —
+real autonomous quality control with money, under a hard budget.
 
 ---
 

@@ -1,39 +1,38 @@
-// The lead-enrichment services the consumer agent can buy from.
+// Real Circle Agent Marketplace services used by the deterministic consumer path
+// (agents/consumer.ts). The agent path discovers these live via circle_search_services;
+// this catalog lets the deterministic path hit the same real endpoints.
 //
-// In production these are discovered via `circle services search` on the Circle
-// Agent Marketplace. For local dev (LOCAL_SERVICES=1) we run them ourselves as
-// x402-compatible endpoints and pay them through `circle services pay <localUrl>`,
-// which still settles a real USDC nanopayment from the Agent Wallet.
-//
-// Two honest sellers wrapping real public search; one rogue that underbids then
-// returns fabricated data — the defection that triggers a wallet-policy blocklist.
+// All settle to the StableEnrich seller on Base. Prices verified via `circle services
+// inspect` (June 2026). Request schemas are documented in buildMission() in leadgen-core.ts.
 
 import "dotenv/config";
 import type { ServiceListing } from "../lib/types.ts";
 
+const STABLEENRICH_PAYTO = "0x325bdF6F7efAB24a2210c48c1b64cAb2eAe1d430";
+
 export const SERVICES: ServiceListing[] = [
   {
-    id: "clearleads",
-    label: "ClearLeads (honest)",
-    url: `http://localhost:${process.env.SVC_A_PORT ?? 4101}/enrich`,
-    payTo: process.env.SVC_A_PAYTO ?? "0xCLEARLEADS",
-    pricePerCallUsdc: 0.1,
+    id: "apollo-people-search",
+    label: "Apollo People Search (StableEnrich)",
+    url: "https://stableenrich.dev/api/apollo/people-search",
+    payTo: STABLEENRICH_PAYTO,
+    pricePerCallUsdc: 0.02,
     behavior: "honest",
   },
   {
-    id: "dataping",
-    label: "DataPing (honest, pricier)",
-    url: `http://localhost:${process.env.SVC_B_PORT ?? 4102}/enrich`,
-    payTo: process.env.SVC_B_PAYTO ?? "0xDATAPING",
-    pricePerCallUsdc: 0.15,
+    id: "apollo-people-enrich",
+    label: "Apollo People Enrich (StableEnrich)",
+    url: "https://stableenrich.dev/api/apollo/people-enrich",
+    payTo: STABLEENRICH_PAYTO,
+    pricePerCallUsdc: 0.0495,
     behavior: "honest",
   },
   {
-    id: "cheaplist",
-    label: "CheapList (ROGUE)",
-    url: `http://localhost:${process.env.SVC_C_PORT ?? 4103}/enrich`,
-    payTo: process.env.SVC_C_PAYTO ?? "0xCHEAPLIST",
-    pricePerCallUsdc: 0.05, // underbids to win, then defects
-    behavior: "rogue",
+    id: "hunter-email-verifier",
+    label: "Hunter Email Verifier (StableEnrich)",
+    url: "https://stableenrich.dev/api/hunter/email-verifier",
+    payTo: STABLEENRICH_PAYTO,
+    pricePerCallUsdc: 0.03,
+    behavior: "honest",
   },
 ];

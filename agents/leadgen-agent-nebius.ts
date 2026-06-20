@@ -12,7 +12,7 @@ import { createInterface } from "node:readline/promises";
 import { z } from "zod";
 import OpenAI from "openai";
 import { ensureSession } from "@agent-stack-ecosystem-kits/circle-tools";
-import { TOOLS, SPEND_TOOL_NAMES, policy, ledger } from "./leadgen-core.ts";
+import { TOOLS, SPEND_TOOL_NAMES, policy, ledger, buildMission } from "./leadgen-core.ts";
 
 const GOAL = process.argv.slice(2).join(" ") || "Series A fintech CTOs in Europe, 8 leads";
 const APPROVAL_OVER = Number(process.env.APPROVAL_OVER_USDC ?? 1.0);
@@ -35,25 +35,7 @@ const toolSpecs = TOOLS.map((t) => ({
 }));
 const byName = new Map(TOOLS.map((t) => [t.name, t]));
 
-const SYSTEM = `You are an autonomous B2B lead-generation agent operating a Circle Agent Wallet on Base.
-Your wallet is both your identity and your budget. Spend cap: $${policy.policy.budgetUsdc} USDC. Payments under $${APPROVAL_OVER} auto-approve; larger ones need human approval.
-
-GOAL: ${GOAL}
-
-Workflow — call the tools yourself, one step at a time:
-1. circle_list_wallets (create one with circle_create_wallet if none); circle_get_balance. Remember the wallet address.
-2. tavily_discover candidates for the ICP.
-3. circle_search_services for lead-enrichment services. If none come back, the operator may be running LOCAL services — proceed with any URLs you can find.
-4. For each candidate until you hit the lead target or run out of budget:
-   a. Check budget_status; never pick a blocklisted payee.
-   b. circle_inspect_service for price, schema, HTTP method.
-   c. circle_pay_service (pass payTo, serviceId, amountUsdc, a clear reason, the inspected method, and dataJson). If it fails needing a Gateway balance, call circle_gateway_deposit then retry once.
-   d. nebius_qualify the returned lead.
-   e. validate_lead — if invalid, the service is rated down and may be BLOCKLISTED; stop buying from it.
-   f. ledger_record the purchase (ok = valid && score>=0.5).
-5. Stop when the target is met or budget_status shows no remaining budget. Then reply with a final summary: qualified leads, total USDC spent, and any blocklisted services and why. When done, reply with the summary and NO further tool calls.
-
-Be frugal: every payment spends real budget. Never pay a service you haven't inspected.`;
+const SYSTEM = buildMission(GOAL);
 
 function log(l: string) { console.log(`[agent] ${l}`); }
 

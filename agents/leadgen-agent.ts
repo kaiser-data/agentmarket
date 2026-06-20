@@ -16,32 +16,13 @@ import { createInterface } from "node:readline/promises";
 import { query, type CanUseTool, type PermissionResult, type SDKMessage, type SDKUserMessage } from "@anthropic-ai/claude-agent-sdk";
 import { ensureSession } from "@agent-stack-ecosystem-kits/circle-tools";
 import { buildLeadgenServer, MCP_SERVER_NAME, SPEND_TOOLS } from "./leadgen-tools.ts";
-import { policy, ledger } from "./leadgen-core.ts";
+import { policy, ledger, buildMission } from "./leadgen-core.ts";
 
 const GOAL = process.argv.slice(2).join(" ") || "Series A fintech CTOs in Europe, 8 leads";
 const APPROVAL_OVER = Number(process.env.APPROVAL_OVER_USDC ?? 1.0);
 const MODEL = process.env.LLM_MODEL || "claude-sonnet-4-6";
 
-const MISSION = `You are an autonomous B2B lead-generation agent operating a Circle Agent Wallet on Base.
-Your wallet is both your identity and your budget. Spend cap: $${policy.policy.budgetUsdc} USDC. Per-call auto-approve under $${APPROVAL_OVER}.
-
-GOAL: ${GOAL}
-
-Run this repeatable workflow, calling tools yourself:
-1. circle_list_wallets (create one with circle_create_wallet if none); circle_get_balance. Note the wallet address.
-2. tavily_discover the candidate companies for the ICP.
-3. circle_search_services for lead-enrichment services on the Marketplace. (If none are returned, the operator may have started LOCAL services — try those URLs.)
-4. For each candidate, until you hit the lead target or the budget cap:
-   a. Pick the best service by price (and avoid any the policy has blocklisted — check budget_status).
-   b. circle_inspect_service to get price, schema, and HTTP method.
-   c. circle_pay_service to buy the enriched record. Always pass payTo, serviceId, amountUsdc, a clear reason, and the inspected method. If it fails needing a Gateway balance, call circle_gateway_deposit then retry once.
-   d. nebius_qualify the returned lead against the ICP.
-   e. validate_lead — if it comes back invalid, the selling service is rated down and may be BLOCKLISTED; do NOT buy from a blocklisted payee again.
-   f. ledger_record the purchase (ok = valid && score>=0.5).
-5. Stop at the lead target or when budget_status shows no remaining budget.
-6. Finish with a short summary: how many qualified leads, total USDC spent, which services were blocklisted and why.
-
-Be frugal: every payment spends real budget. Never pay a service you haven't inspected. Prefer cheaper services but stop paying any that sell invalid data.`;
+const MISSION = buildMission(GOAL);
 
 function log(l: string) { console.log(`[agent] ${l}`); }
 
