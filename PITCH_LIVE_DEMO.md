@@ -1,10 +1,12 @@
 # THEMIS — Live Demo Pitch Script (~3.5 min)
 
 **Live:** https://themis-agent-trust.netlify.app
-**One line:** _Trust layer for agent commerce — who your agent should pay, and who to avoid._
+**One line:** _A trust & policy layer for autonomous agent commerce — before an agent pays an unknown service, THEMIS tells the wallet whether to pay, trial, or refuse, and why._
 
 > Stage directions in `[brackets]`. Spoken lines in plain text.
 > Total ~3.5 min. Optional trims marked **(cut for 2-min)**.
+>
+> **The line to land at least once:** _"Payment proves the interaction happened. Verification proves whether it was good. Wash-risk analysis asks whether the reputation was honestly earned. The wallet policy decides whether to spend."_
 
 ---
 
@@ -20,20 +22,24 @@ that can't be faked."
 
 ---
 
-## 1 · The thesis (~25s)
+## 1 · The thesis (~30s)
 [Point at the hero line and the gold "Reviews are claims" strip.]
 
-"Reviews are claims. THEMIS requires three things before a reputation moves:
-a **real payment**, an **independent verification**, and an **on-chain attestation**
-on ERC-8004. No payment, no verification — no score.
+"Human marketplaces handle trust with reviews, brands, contracts, and fraud teams.
+Agents have none of that. THEMIS is the machine-readable version — a trust **and policy**
+layer for autonomous commerce.
 
-And the key insight: we never say _payment proves quality_ — that's attackable.
-We score two things separately."
+The chain is the whole pitch: **payment** proves the interaction happened. **Verification**
+proves it was good. **Wash-risk** asks whether the reputation was honestly earned. And the
+**wallet policy** decides whether to spend.
+
+The trick that makes it un-fakeable: we never collapse that into one number."
 
 [Point at the two columns: **Quality** and **Wash Risk**.]
 
 "**Quality** — did the output pass independent verification.
-**Wash Risk** — could this reputation have been _manufactured_."
+**Wash Risk** — could this reputation have been _manufactured_. A perfect score with a faked
+history gets caught right here."
 
 ---
 
@@ -115,15 +121,16 @@ It avoided the bad actor in advance. Money saved, bad data avoided."
 ## 6 · Close + the ask (~25s)
 [Back to the home page, or the About page bounty list.]
 
-"Everything you saw is live on Base Sepolia — every score links to BaseScan; don't
-trust us, verify it.
+"Everything you saw is backed by real Base Sepolia receipts — every score links to
+BaseScan; don't trust us, verify it.
 
-THEMIS is the trust layer the agent economy needs to be safe at scale:
-**Circle** for payments, **ERC-8004** for identity and reputation, **Nebius** for the
-agent brain, **Tavily** for discovery.
+The wedge is paid data and API marketplaces first — enrichment, search, scraping,
+verification, MCP servers — then any agent-provided service. Built on **Circle** for
+payments, **ERC-8004** for identity and reputation, **Nebius** for the agent brain,
+**Tavily** for discovery.
 
 A trillion-dollar agent economy can't run on reputation you can fake. So we made
-reputation you can't. Thanks."
+reputation you can't — and a wallet that knows what to do with it. Thanks."
 
 ---
 
