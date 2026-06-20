@@ -53,6 +53,22 @@ A service with a **100% pass rate but a circular buyer→seller funding loop** i
 **Suspicious**, not Trusted — and the [policy engine](https://themis-agent-trust.netlify.app/policy)
 turns that verdict into a `PAY / TRIAL / REFUSE` decision your wallet can enforce (exportable as JSON).
 
+## 🟢 What's real vs. 🟡 what's simulated (hackathon honesty)
+
+We'd rather you know exactly where the line is:
+
+| Real, on-chain (Base Sepolia) | Simulated / modeled for the demo |
+|---|---|
+| 3 ERC-721 service identities (`7100`–`7102`) | **Marketplace USDC payments** — Circle's marketplace is mainnet-only, so payments run under `SIMULATE=1` (the rail and code are real; the spend isn't executed) |
+| 9 `giveFeedback` attestations + `getSummary` reads | **Actor funding-root clustering** behind Wash Risk — modeled here; production reads tx senders via RPC (same engine math) |
+| Keyless Circle MPC signing of those attestations | **Helix & Nimbus** services — labeled *Simulated* in the UI; teaching examples for the Suspicious / Unproven categories |
+
+The novel layer — payment-anchored, verification-backed **reputation** — is genuinely live and
+verifiable on-chain (links below). Reputation (`ONCHAIN_REPUTATION=1`) and payment (`SIMULATE=1`)
+are **decoupled by design**, so the on-chain part is real on free testnet while marketplace spend
+stays simulated. The three on-chain services (Apollo, Minerva, Clado) carry real receipts; the two
+simulated services are badged as such everywhere.
+
 ## See it in 90 seconds
 | Step | Where |
 |---|---|
